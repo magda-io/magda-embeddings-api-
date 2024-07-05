@@ -1,0 +1,137 @@
+global:
+  image: {}
+  rollingUpdate: {}
+
+debug: false
+
+# image setting loadding order: (from higher priority to lower priority)
+# - Values.image.x
+# - Values.defaultImage.x
+# You can set `imagePullSecret` value to `false` (bool) to reset the value (see example below)
+
+image: 
+  name: "magda-embedding-api"
+  # repository: 
+  # pullPolicy: 
+  # imagePullSecret: 
+
+defaultImage:
+  repository: ghcr.io/magda-io
+  pullPolicy: IfNotPresent
+  imagePullSecret: false
+
+nameOverride: ""
+fullnameOverride: ""
+
+replicas: 1
+
+autoscaling:
+  hpa:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPU: 90
+    targetMemory: ""  
+
+priorityClassName: magda-9
+
+podSecurityContext:
+  runAsUser: 1000
+
+rbac:
+  create: false
+  serviceAccountAnnotations: {}
+  serviceAccountName: ""
+  # -- Controls whether or not the Service Account token is automatically mounted to /var/run/secrets/kubernetes.io/serviceaccount
+  automountServiceAccountToken: false
+
+hostAliases: []
+
+startupProbe:
+  tcpSocket:
+    port: 5601
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 20
+  successThreshold: 1
+  initialDelaySeconds: 10
+
+livenessProbe:
+  tcpSocket:
+    port: 5601
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 10
+  successThreshold: 1
+  initialDelaySeconds: 10
+
+readinessProbe:
+  tcpSocket:
+    port: 5601
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 10
+  successThreshold: 1
+  initialDelaySeconds: 10
+
+extraEnvs: []
+#  - name: "NODE_OPTIONS"
+#    value: "--max-old-space-size=1800"
+
+envFrom: []
+
+extraVolumes: []
+  # - name: extras
+  #   emptyDir: {}
+
+extraVolumeMounts: []
+  # - name: extras
+  #   mountPath: /usr/share/extras
+  #   readOnly: true
+
+extraInitContainers: ""
+
+extraContainers: ""
+
+service:
+  name: "magda-embedding-api"
+  type: ClusterIP
+  # The IP family and IP families options are to set the behaviour in a dual-stack environment
+  # Omitting these values will let the service fall back to whatever the CNI dictates the defaults
+  # should be
+  #
+  # ipFamilyPolicy: SingleStack
+  # ipFamilies:
+  # - IPv4
+  port: 5601
+  loadBalancerIP: ""
+  nodePort: ""
+  labels: {}
+  annotations: {}
+  loadBalancerSourceRanges: []
+  # 0.0.0.0/0
+  httpPortName: http
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# -- This is the pod topology spread constraints
+# https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
+topologySpreadConstraints: []
+
+# -- pod lifecycle policies as outlined here:
+# https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
+lifecycle: {}
+
+deploymentAnnotations: {}
+podAnnotations: {}
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "512M"
+  limits:
+    memory: "512M"

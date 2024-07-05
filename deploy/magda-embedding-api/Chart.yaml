@@ -1,0 +1,11 @@
+apiVersion: v2
+name: magda-embedding-api
+description: An OpenAI embeddings API compatible microservice for Magda.
+version: "1.0.0"
+kubeVersion: ">= 1.21.0"
+home: "https://github.com/magda-io/magda-embedding-api"
+sources: [ "https://github.com/magda-io/magda-embedding-api" ]
+dependencies:
+  - name: magda-common
+    version: "4.2.1"
+    repository: "oci://ghcr.io/magda-io/charts"
