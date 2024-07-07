@@ -11,4 +11,4 @@ USER 1001
 
 COPY . /usr/src/app
 WORKDIR /usr/src/app/component
-ENTRYPOINT [ "node", "/usr/src/app/component/dist/index.js" ]
+CMD [ "node", "./node_modules/fastify-cli/cli.js", "start", "-l", "info", "dist/app.js"]
