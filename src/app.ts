@@ -19,7 +19,6 @@ const app: FastifyPluginAsync<AppOptions> = async (
     opts
 ): Promise<void> => {
     // Place here your custom code!
-
     fastify.register(sensible, {
         sharedSchemaId: "HttpError"
     });

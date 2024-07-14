@@ -1,7 +1,7 @@
 import { FastifyPluginAsync } from "fastify";
 import { Type } from "@sinclair/typebox";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
-import embeddingGenerator from "../../../plugins/embeddingGenerator.js";
+import setupEmbeddingGenerator from "../../../plugins/setupEmbeddingGenerator.js";
 
 const schemaEmebeddingObject = Type.Object({
     index: Type.Integer(),
@@ -25,7 +25,7 @@ const embeddings: FastifyPluginAsync = async (
 ): Promise<void> => {
     const fastify = fastifyInstance.withTypeProvider<TypeBoxTypeProvider>();
 
-    fastify.register(embeddingGenerator);
+    fastify.register(setupEmbeddingGenerator);
 
     fastify.post("/", { schema }, async function (request, reply) {
         if (

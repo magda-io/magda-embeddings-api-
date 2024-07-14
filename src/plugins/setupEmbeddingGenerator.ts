@@ -24,9 +24,10 @@ export default fp<SupportPluginOptions>(async (fastify, opts) => {
 
     fastify.addHook("onRequest", function (request, reply, next) {
         if (!request.embeddingGenerator.ready) {
-            reply.statusCode = 503;
             reply.header("Retry-After", WAIT_TIME_MS);
-            reply.send({ error: true, retryInMs: WAIT_TIME_MS });
+            reply.serviceUnavailable(
+                `Embedding service is not ready yet. Please try again in ${WAIT_TIME_MS}ms.`
+            );
         }
         next();
     });
