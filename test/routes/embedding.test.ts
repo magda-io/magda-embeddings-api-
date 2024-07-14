@@ -1,6 +1,8 @@
-import { pipeline, dot } from "@xenova/transformers";
+import { test } from "node:test";
+import * as assert from "node:assert";
+import { pipeline } from "@xenova/transformers";
 
-(async () => {
+test("default root route", async (t) => {
     // Create feature extraction pipeline
     const extractor = await pipeline(
         "feature-extraction",
@@ -23,16 +25,9 @@ import { pipeline, dot } from "@xenova/transformers";
         pooling: "cls"
     });
     console.timeEnd("embedding");
+    console.log("embedding tensor JSON:", JSON.stringify(output));
+    console.log("embedding tensor data JSON:", JSON.stringify(output.data));
+    console.log("embedding list JSON:", JSON.stringify(output.tolist()));
 
-    // console.log("embedding tensor JSON:", JSON.stringify(output));
-    // console.log("embedding tensor data JSON:", JSON.stringify(output.data));
-    // console.log("embedding list JSON:", JSON.stringify(output.tolist()));
-    const result = output.tolist();
-    console.log(typeof result[0][0]);
-    // Compute similarity scores
-    const [sourceEmbeddings, ...documentEmbeddings] = output.tolist();
-    const similarities = documentEmbeddings.map(
-        (x) => 100 * dot(sourceEmbeddings, x)
-    );
-    console.log(similarities);
-})();
+    assert.deepStrictEqual(JSON.parse("{ 'root': true }"), { root: true });
+});

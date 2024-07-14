@@ -28,7 +28,7 @@
     "docker-build-local": "create-docker-context-for-node-component --build --push --tag auto --local",
     "docker-build-prod": "create-docker-context-for-node-component --build --push --tag auto",
     "retag-and-push": "retag-and-push",
-    "test": "npm run build && tsc -p test/tsconfig.json && c8 node --test -r ts-node/register \"test/**/*.ts\"",
+    "test": "tsc -p test/tsconfig.json && tap run --show-full-coverage",
     "lint": "eslint && prettier --check ./src",
     "helm-docs": "docker run --rm -v \"$(pwd):/helm-docs\" -u $(id -u) jnorwood/helm-docs:v1.13.1 -t ./README.md.gotmpl -o ../../README.md",
     "update-all-charts": "helm dep up ./deploy/magda-embedding-api",
@@ -37,16 +37,18 @@
     "version": "yarn update-helm-chart-version && yarn update-all-charts && yarn add-all-chart-version-changes && yarn add-all-helm-docs-changes"
   },
   "dependencies": {
-    "@xenova/transformers": "^2.17.2",
-    "fastify": "^4.28.1",
-    "fastify-plugin": "^4.5.1",
     "@fastify/autoload": "^5.10.0",
     "@fastify/sensible": "^5.6.0",
-    "fastify-cli": "^6.2.1"
+    "@xenova/transformers": "^2.17.2",
+    "fastify": "^4.28.1",
+    "fastify-cli": "^6.2.1",
+    "fastify-plugin": "^4.5.1"
   },
   "devDependencies": {
+    "@fastify/type-provider-typebox": "^4.0.0",
     "@magda/ci-utils": "^1.0.5",
     "@magda/docker-utils": "^4.2.1",
+    "@sinclair/typebox": "^0.32.34",
     "@types/node": "18.19.3",
     "concurrently": "^8.2.2",
     "eslint": "^9.6.0",
@@ -58,8 +60,11 @@
     "rimraf": "^5.0.7",
     "simple-git-hooks": "^2.11.1",
     "tap": "^20.0.3",
-    "tsx": "^4.16.2",
     "typescript": "^5.5.3"
+  },
+  "tap": {
+    "tsconfig": "./test/tsconfig.json",
+    "timeout": 120
   },
   "config": {
     "docker": {
