@@ -1,8 +1,9 @@
 import { pipeline, FeatureExtractionPipeline } from "@xenova/transformers";
 
-class EmbeddingsService {
+class EmbeddingGenerator {
     private extractor?: FeatureExtractionPipeline = undefined;
     public ready: boolean = false;
+    public supportModels = ["gte-base-en-v1.5"];
 
     async init() {
         // Create feature extraction pipeline
@@ -29,4 +30,4 @@ class EmbeddingsService {
     }
 }
 
-export default EmbeddingsService;
+export default EmbeddingGenerator;

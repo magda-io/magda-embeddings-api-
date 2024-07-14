@@ -2,6 +2,7 @@ import * as path from "path";
 import AutoLoad, { AutoloadPluginOptions } from "@fastify/autoload";
 import { FastifyPluginAsync } from "fastify";
 import { fileURLToPath } from "url";
+import sensible from "@fastify/sensible";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,16 +20,20 @@ const app: FastifyPluginAsync<AppOptions> = async (
 ): Promise<void> => {
     // Place here your custom code!
 
+    fastify.register(sensible, {
+        sharedSchemaId: "HttpError"
+    });
+
     // Do not touch the following lines
 
     // This loads all plugins defined in plugins
     // those should be support plugins that are reused
     // through your application
-    fastify.register(AutoLoad, {
-        dir: path.join(__dirname, "plugins"),
-        options: opts,
-        forceESM: true
-    });
+    // fastify.register(AutoLoad, {
+    //     dir: path.join(__dirname, "plugins"),
+    //     options: opts,
+    //     forceESM: true
+    // });
 
     // This loads all plugins defined in routes
     // define your routes in one of these
