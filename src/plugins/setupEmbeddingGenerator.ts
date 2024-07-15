@@ -16,19 +16,26 @@ const WAIT_TIME_MS = 500;
 
 // The use of fastify-plugin is required to be able
 // to export the decorators to the outer scope
-export default fp<SupportPluginOptions>(async (fastify, opts) => {
-    const es = new EmbeddingGenerator();
-    es.init();
+export default fp<SupportPluginOptions>(
+    async (fastify, opts) => {
+        const es = new EmbeddingGenerator();
+        es.init();
 
-    fastify.decorateRequest("embeddingGenerator", es);
+        fastify.decorateRequest("embeddingGenerator", es);
 
-    fastify.addHook("onRequest", function (request, reply, next) {
-        if (!request.embeddingGenerator.ready) {
-            reply.header("Retry-After", WAIT_TIME_MS);
-            reply.serviceUnavailable(
-                `Embedding service is not ready yet. Please try again in ${WAIT_TIME_MS}ms.`
-            );
-        }
-        next();
-    });
-});
+        fastify.addHook("onRequest", function (request, reply, next) {
+            if (!request.embeddingGenerator.ready) {
+                reply.header("Retry-After", WAIT_TIME_MS);
+                reply.serviceUnavailable(
+                    `Embedding service is not ready yet. Please try again in ${WAIT_TIME_MS}ms.`
+                );
+            }
+            next();
+        });
+    },
+    {
+        fastify: "4.x",
+        name: "setupEmbeddingGenerator",
+        dependencies: ["@fastify/sensible"]
+    }
+);

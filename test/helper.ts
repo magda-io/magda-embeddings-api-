@@ -1,6 +1,6 @@
 // This file contains code that we reuse between our tests.
 import helper from "fastify-cli/helper.js";
-import * as test from "node:test";
+import type * as test from "node:test";
 import * as path from "path";
 import { fileURLToPath } from "url";
 
@@ -29,7 +29,7 @@ async function build(t: TestContext) {
     const app = await helper.build(argv, await config());
 
     // Tear down our app after we are done
-    t.after(() => void app.close());
+    t.after(() => app.close());
 
     return app;
 }
