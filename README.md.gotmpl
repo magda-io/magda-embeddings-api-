@@ -1,6 +1,6 @@
 # magda-embedding-api
 
-![CI Workflow](https://github.com/magda-io/magda-embedding-api/workflows/Main%20CI%20Workflow/badge.svg?branch=main) [![Release](https://img.shields.io/github/release/magda-io/magda-embedding-api.svg)](https://github.com/magda-io/magda-embedding-api/releases)
+![CI Workflow](https://github.com/magda-io/magda-embedding-api/actions/workflows/main.yml/badge.svg?branch=main) [![Release](https://img.shields.io/github/release/magda-io/magda-embedding-api.svg)](https://github.com/magda-io/magda-embedding-api/releases)
 
 An [OpenAI's `embeddings` API](https://platform.openai.com/docs/api-reference/embeddings/create) compatible microservice for Magda.
 
