@@ -48,17 +48,19 @@ rbac:
 hostAliases: []
 
 startupProbe:
-  tcpSocket:
-    port: 5601
+  httpGet:
+    path: /status/startup
+    port: 8080
   periodSeconds: 10
   timeoutSeconds: 5
-  failureThreshold: 20
+  failureThreshold: 30
   successThreshold: 1
   initialDelaySeconds: 10
 
 livenessProbe:
-  tcpSocket:
-    port: 5601
+  httpGet:
+    path: /status/liveness
+    port: 8080
   periodSeconds: 20
   timeoutSeconds: 5
   failureThreshold: 10
@@ -66,8 +68,9 @@ livenessProbe:
   initialDelaySeconds: 10
 
 readinessProbe:
-  tcpSocket:
-    port: 5601
+  httpGet:
+    path: /status/readiness
+    port: 8080
   periodSeconds: 20
   timeoutSeconds: 5
   failureThreshold: 10
@@ -103,7 +106,7 @@ service:
   # ipFamilyPolicy: SingleStack
   # ipFamilies:
   # - IPv4
-  port: 5601
+  port: 8080
   loadBalancerIP: ""
   nodePort: ""
   labels: {}
