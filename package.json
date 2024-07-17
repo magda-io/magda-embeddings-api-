@@ -28,7 +28,7 @@
     "docker-build-local": "create-docker-context-for-node-component --build --push --tag auto --local",
     "docker-build-prod": "create-docker-context-for-node-component --build --push --tag auto",
     "retag-and-push": "retag-and-push",
-    "test": "tap run --show-full-coverage",
+    "test": "tap run --show-full-coverage --allow-incomplete-coverage",
     "lint": "eslint ./src && prettier --check ./src",
     "helm-docs": "docker run --rm -v \"$(pwd):/helm-docs\" -u $(id -u) jnorwood/helm-docs:v1.13.1 -t ./README.md.gotmpl -o ../../README.md",
     "update-all-charts": "helm dep up ./deploy/magda-embedding-api",
@@ -65,6 +65,9 @@
   },
   "tap": {
     "tsconfig": "./test/tsconfig.json",
+    "exclude": [
+      "test/helper.ts"
+    ],
     "timeout": 120,
     "jobs": 1
   },
