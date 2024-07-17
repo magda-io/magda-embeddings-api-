@@ -25,6 +25,7 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - run: yarn install
+      - run: yarn lint
       - run: yarn build
       - run: yarn test
 
