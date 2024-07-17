@@ -2,17 +2,7 @@ import t from "tap";
 import Fastify from "fastify";
 import sensible from "@fastify/sensible";
 import type SetupEmbeddingGeneratorType from "../../src/plugins/setupEmbeddingGenerator.js";
-import EmbeddingGenerator from "../../src/libs/EmbeddingGenerator.js";
-
-const MODEL_LOADING_TIME = 500;
-
-class MockEmbeddingGenerator extends EmbeddingGenerator {
-    override async init() {
-        await new Promise((resolve) => setTimeout(resolve, MODEL_LOADING_TIME));
-        this.ready = true;
-        return {} as any;
-    }
-}
+import { MockEmbeddingGenerator } from "../helper.js";
 
 const SetupEmbeddingGenerator = await t.mockImport<
     typeof SetupEmbeddingGeneratorType
@@ -25,8 +15,8 @@ t.test("should works for child plugin routes", async (t) => {
     fastify.register(sensible);
     fastify.register(SetupEmbeddingGenerator);
     fastify.register(async (fastify, opts) => {
-        fastify.get("/test", async (request, reply) => {
-            if (typeof request.embeddingGenerator.ready === "boolean") {
+        fastify.get("/test", async function (request, reply) {
+            if (typeof this.embeddingGenerator === "object") {
                 return { hasPlugin: true };
             } else {
                 return { hasPlugin: false };
@@ -34,9 +24,6 @@ t.test("should works for child plugin routes", async (t) => {
         });
     });
     await fastify.ready();
-    await new Promise((resolve) =>
-        setTimeout(resolve, MODEL_LOADING_TIME + 100)
-    );
     const res = await fastify.inject({
         url: "/test"
     });
@@ -44,14 +31,14 @@ t.test("should works for child plugin routes", async (t) => {
 });
 
 t.test(
-    "should reply 503 unavailable before embedding service is ready",
+    "should reply 503 unavailable when embedding service is not ready",
     async (t) => {
         const fastify = Fastify();
         fastify.register(sensible);
         fastify.register(SetupEmbeddingGenerator);
         fastify.register(async (fastify, opts) => {
-            fastify.get("/test", async (request, reply) => {
-                if (typeof request.embeddingGenerator.ready === "boolean") {
+            fastify.get("/test", async function (request, reply) {
+                if (typeof this.embeddingGenerator === "object") {
                     return { hasPlugin: true };
                 } else {
                     return { hasPlugin: false };
@@ -62,6 +49,39 @@ t.test(
         const res = await fastify.inject({
             url: "/test"
         });
-        t.equal(res.statusCode, 503);
+        t.same(JSON.parse(res.payload), { hasPlugin: true });
+        (fastify.embeddingGenerator as any).setReady(false);
+        const res2 = await fastify.inject({
+            url: "/test"
+        });
+        t.equal(res2.statusCode, 503);
+    }
+);
+
+t.test(
+    "should not reply 503 unavailable for /status/* endpoints, when embedding service is not ready",
+    async (t) => {
+        const fastify = Fastify();
+        fastify.register(sensible);
+        fastify.register(SetupEmbeddingGenerator);
+        fastify.register(async (fastify, opts) => {
+            fastify.get("/status/ready", async function (request, reply) {
+                if (typeof this.embeddingGenerator === "object") {
+                    return { hasPlugin: true };
+                } else {
+                    return { hasPlugin: false };
+                }
+            });
+        });
+        await fastify.ready();
+        const res = await fastify.inject({
+            url: "/status/ready"
+        });
+        t.same(JSON.parse(res.payload), { hasPlugin: true });
+        (fastify.embeddingGenerator as any).setReady(false);
+        const res2 = await fastify.inject({
+            url: "/status/ready"
+        });
+        t.equal(res2.statusCode, 200);
     }
 );

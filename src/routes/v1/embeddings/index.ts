@@ -1,7 +1,11 @@
 import { FastifyPluginAsync } from "fastify";
 import { Type } from "@sinclair/typebox";
+import { StringEnum } from "../../../libs/types.js";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
-import setupEmbeddingGenerator from "../../../plugins/setupEmbeddingGenerator.js";
+import {
+    supportModels,
+    defaultModel
+} from "../../../libs/EmbeddingGenerator.js";
 
 const schemaEmebeddingObject = Type.Object({
     index: Type.Integer(),
@@ -15,7 +19,15 @@ const schema = {
         model: Type.Optional(Type.String())
     }),
     response: {
-        200: Type.Array(schemaEmebeddingObject)
+        200: Type.Object({
+            object: Type.Const("list"),
+            data: Type.Array(schemaEmebeddingObject),
+            model: StringEnum(supportModels),
+            usage: Type.Object({
+                prompt_tokens: Type.Integer(),
+                total_tokens: Type.Integer()
+            })
+        })
     }
 };
 
@@ -25,28 +37,38 @@ const embeddings: FastifyPluginAsync = async (
 ): Promise<void> => {
     const fastify = fastifyInstance.withTypeProvider<TypeBoxTypeProvider>();
 
-    fastify.register(setupEmbeddingGenerator);
-
     fastify.post("/", { schema }, async function (request, reply) {
         if (
             request.body.model &&
-            request.embeddingGenerator.supportModels.indexOf(
-                request.body.model
-            ) === -1
+            supportModels.indexOf(request.body.model) === -1
         ) {
             throw fastify.httpErrors.badRequest(
-                `Model \`${request.body.model}\` is not supported. Supported models: ${request.embeddingGenerator.supportModels.join(", ")}`
+                `Model \`${request.body.model}\` is not supported. Supported models: ${supportModels.join(", ")}`
             );
         }
+        const model = request.body.model || defaultModel;
         const inputItems = Array.isArray(request.body.input)
             ? request.body.input
             : [request.body.input];
-        const results = await request.embeddingGenerator.generate(inputItems);
-        return results.map((embedding, index) => ({
+        const results = await this.embeddingGenerator.generate(
+            inputItems,
+            model
+        );
+        const { embeddings, tokenSize } = results;
+        const data = embeddings.map((embedding, index) => ({
             index,
             embedding,
             object: "embedding"
         }));
+        return {
+            object: "list",
+            data,
+            model,
+            usage: {
+                prompt_tokens: tokenSize,
+                total_tokens: tokenSize
+            }
+        };
     });
 };
 

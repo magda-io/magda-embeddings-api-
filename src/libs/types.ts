@@ -5,3 +5,10 @@ export const StringEnum = <T extends string[]>(values: [...T]) =>
         type: "string",
         enum: values
     });
+
+export const HttpErrorResponseSchema = Type.Object({
+    status: Type.Integer(),
+    statusCode: Type.Integer(),
+    expose: Type.Boolean(),
+    headers: Type.Optional(Type.Record(Type.String(), Type.String()))
+});

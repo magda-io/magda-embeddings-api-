@@ -3,7 +3,7 @@ import EmbeddingGenerator from "../libs/EmbeddingGenerator.js";
 
 // When using .decorate you have to specify added properties for Typescript
 declare module "fastify" {
-    export interface FastifyRequest {
+    export interface FastifyInstance {
         embeddingGenerator: EmbeddingGenerator;
     }
 }
@@ -18,13 +18,14 @@ const WAIT_TIME_MS = 500;
 // to export the decorators to the outer scope
 export default fp<SupportPluginOptions>(
     async (fastify, opts) => {
-        const es = new EmbeddingGenerator();
-        es.init();
-
-        fastify.decorateRequest("embeddingGenerator", es);
+        const embeddingGenerator = new EmbeddingGenerator();
+        fastify.decorate("embeddingGenerator", embeddingGenerator);
 
         fastify.addHook("onRequest", function (request, reply, next) {
-            if (!request.embeddingGenerator.ready) {
+            if (request.url.startsWith("/status/")) {
+                return next();
+            }
+            if (!this.embeddingGenerator.isReady()) {
                 reply.header("Retry-After", WAIT_TIME_MS);
                 reply.serviceUnavailable(
                     `Embedding service is not ready yet. Please try again in ${WAIT_TIME_MS}ms.`
@@ -32,6 +33,12 @@ export default fp<SupportPluginOptions>(
             }
             next();
         });
+
+        fastify.addHook("onClose", async function (instance) {
+            await instance.embeddingGenerator.dispose();
+        });
+
+        await embeddingGenerator.waitTillReady();
     },
     {
         fastify: "4.x",

@@ -3,6 +3,8 @@ import helper from "fastify-cli/helper.js";
 import type * as test from "node:test";
 import * as path from "path";
 import { fileURLToPath } from "url";
+import type { Test } from "tap";
+import EmbeddingGenerator from "../src/libs/EmbeddingGenerator.js";
 
 export type TestContext = {
     after: typeof test.after;
@@ -14,12 +16,12 @@ const AppPath = path.join(__dirname, "..", "src", "app.ts");
 
 // Fill in this config with all the configurations
 // needed for testing the application
-async function config() {
+export async function config() {
     return {};
 }
 
 // Automatically build and tear down our instance
-async function build(t: TestContext) {
+export async function build(t: TestContext | Test) {
     // you can set all the options supported by the fastify CLI command
     const argv = [AppPath];
 
@@ -34,4 +36,23 @@ async function build(t: TestContext) {
     return app;
 }
 
-export { config, build };
+export const MOCK_MODEL_LOADING_TIME = 500;
+
+export class MockEmbeddingGenerator extends EmbeddingGenerator {
+    private mockModelLoadingTime: number;
+
+    constructor(mockModelLoadingTime: number = MOCK_MODEL_LOADING_TIME) {
+        super();
+        this.mockModelLoadingTime = mockModelLoadingTime;
+    }
+    override async init() {
+        await new Promise((resolve) =>
+            setTimeout(resolve, this.mockModelLoadingTime)
+        );
+        this.ready = true;
+        return {} as any;
+    }
+    setReady(v: boolean) {
+        this.ready = v;
+    }
+}
