@@ -4,7 +4,7 @@
 
 An [OpenAI's `embeddings` API](https://platform.openai.com/docs/api-reference/embeddings/create) compatible microservice for Magda.
 
-> See [this test case](../test/integration.test.ts) for an example of how to use this API with [@langchain/openai](https://www.npmjs.com/package/@langchain/openai).
+> See [this test case](./test/integration.test.ts) for an example of how to use this API with [@langchain/openai](https://www.npmjs.com/package/@langchain/openai).
 
 Text embeddings evaluate how closely related text strings are. They are commonly utilized for:
 
