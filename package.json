@@ -6,10 +6,8 @@
   "main": "app.ts",
   "workspaces": {
     "nohoist": [
-      "**/tap",
-      "**/tap/**",
-      "**/rimraf",
-      "**/rimraf/**"
+      "**/onnxruntime-node",
+      "**/onnxruntime-node/**"
     ]
   },
   "directories": {
