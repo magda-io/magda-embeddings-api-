@@ -4,12 +4,6 @@
   "version": "1.0.0",
   "description": "An OpenAI embeddings API compatible microservice for Magda.",
   "main": "app.ts",
-  "workspaces": {
-    "nohoist": [
-      "**/onnxruntime-node",
-      "**/onnxruntime-node/**"
-    ]
-  },
   "directories": {
     "test": "test"
   },
@@ -70,6 +64,9 @@
     "simple-git-hooks": "^2.11.1",
     "tap": "^20.0.3",
     "typescript": "^5.5.3"
+  },
+  "resolutions": {
+    "strip-ansi": "^6.0.1"
   },
   "tap": {
     "tsconfig": "./test/tsconfig.json",
