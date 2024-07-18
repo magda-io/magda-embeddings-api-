@@ -4,6 +4,14 @@
   "version": "1.0.0",
   "description": "An OpenAI embeddings API compatible microservice for Magda.",
   "main": "app.ts",
+  "workspaces": {
+    "nohoist": [
+      "**/tap",
+      "**/tap/**",
+      "**/rimraf",
+      "**/rimraf/**"
+    ]
+  },
   "directories": {
     "test": "test"
   },
