@@ -103,6 +103,11 @@ spec:
 {{ toYaml .Values.securityContext | indent 10 }}
         image: {{ include "magda.image" . | quote }}
         imagePullPolicy: {{ include "magda.imagePullPolicy" . | quote }}
+        command:
+        - "node"
+        - "./node_modules/fastify-cli/cli.js"
+        - "start"
+        - "dist/app.js"
         {{- if .Values.readinessProbe }}
         readinessProbe:
 {{ toYaml .Values.readinessProbe | indent 10 }}
@@ -118,8 +123,22 @@ spec:
         {{- end }}
         {{- end }}
         env:
-        - name: DEBUG
-          value: {{ .Values.debug | quote }}
+        - name: FASTIFY_PORT
+          value: {{ .Values.service.port | quote }}
+        {{- if .Values.debug }}
+        - name: FASTIFY_DEBUG
+          value: "true"
+        {{- end }}
+        {{- if .Values.pluginTimeout }}
+        - name: FASTIFY_PLUGIN_TIMEOUT
+          value: {{ .Values.pluginTimeout | quote }}
+        {{- end }}
+        - name: FASTIFY_LOG_LEVEL
+          value: {{ .Values.logLevel | quote }}
+        - name: FASTIFY_BODY_LIMIT
+          value: {{ .Values.bodyLimit | quote }}
+        - name: FASTIFY_CLOSE_GRACE_DELAY
+          value: {{ .Values.closeGraceDelay | quote }}
 {{- if .Values.extraEnvs }}
 {{ toYaml .Values.extraEnvs | indent 8 }}
 {{- end }}

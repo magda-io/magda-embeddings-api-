@@ -2,7 +2,30 @@ global:
   image: {}
   rollingUpdate: {}
 
+# -- (bool) Start Fastify app in debug mode with nodejs inspector
+# inspector port is 9320
 debug: false
+
+# -- (string) The log level of the application.
+# one of 'fatal', 'error', 'warn', 'info', 'debug', 'trace'; 
+# also 'silent' is supported to disable logging. 
+# Any other value defines a custom level and requires supplying a level value via levelVal. 
+# @default -- `info`.
+logLevel: "info"
+
+# -- (int) The maximum amount of time in milliseconds in which a fastify plugin can load. 
+# If not, ready will complete with an Error with code 'ERR_AVVIO_PLUGIN_TIMEOUT'.
+# @default -- Default to 10000 (10 seconds).
+pluginTimeout: 
+
+# -- (int) Defines the maximum payload, in bytes, that the server is allowed to accept
+# @default -- Default to 10485760 (10MB).
+bodyLimit: 10485760
+
+# -- (int) The maximum amount of time before forcefully closing pending requests.
+# This should set to a value lower than the Pod's termination grace period (which is default to 30s)
+# @default -- Default to 25000 (25s).
+closeGraceDelay: 25000
 
 # image setting loadding order: (from higher priority to lower priority)
 # - Values.image.x
@@ -50,7 +73,7 @@ hostAliases: []
 startupProbe:
   httpGet:
     path: /status/startup
-    port: 8080
+    port: 3000
   periodSeconds: 10
   timeoutSeconds: 5
   failureThreshold: 30
@@ -60,7 +83,7 @@ startupProbe:
 livenessProbe:
   httpGet:
     path: /status/liveness
-    port: 8080
+    port: 3000
   periodSeconds: 20
   timeoutSeconds: 5
   failureThreshold: 10
@@ -70,7 +93,7 @@ livenessProbe:
 readinessProbe:
   httpGet:
     path: /status/readiness
-    port: 8080
+    port: 3000
   periodSeconds: 20
   timeoutSeconds: 5
   failureThreshold: 10
@@ -106,7 +129,8 @@ service:
   # ipFamilyPolicy: SingleStack
   # ipFamilies:
   # - IPv4
-  port: 8080
+  port: 80
+  targetPort: 3000
   loadBalancerIP: ""
   nodePort: ""
   labels: {}
