@@ -1,5 +1,5 @@
 FROM node:18-bullseye-slim
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 # follow openshfit guidelines for supporting arbitrary user IDs
 # https://docs.openshift.com/container-platform/4.16/creating_images/guidelines.html#openshift-container-platform-specific-guidelines
