@@ -124,7 +124,7 @@ spec:
         {{- end }}
         env:
         - name: FASTIFY_PORT
-          value: {{ .Values.service.port | quote }}
+          value: {{ .Values.service.targetPort | quote }}
         {{- if .Values.debug }}
         - name: FASTIFY_DEBUG
           value: "true"
