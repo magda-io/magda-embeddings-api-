@@ -147,7 +147,7 @@ spec:
 {{ toYaml .Values.envFrom | indent 10 }}
 {{- end }}
         ports:
-        - containerPort: {{ .Values.service.port }}
+        - containerPort: {{ .Values.service.targetPort }}
           name: {{ .Values.service.httpPortName | default "http" }}
           protocol: TCP
 {{- if .Values.lifecycle }}
