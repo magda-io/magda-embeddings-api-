@@ -19,6 +19,21 @@ An embedding is a vector, or a list, of floating-point numbers. The distance bet
 
 This embedding API is created for [Magda](https://github.com/magda-io/magda)'s vector / hybrid search solution. The API interface is compatible with OpenAI's `embeddings` API to make it easier to reuse existing tools & libraries.
 
+### Resources requirementsSection
+
+Due to [this issue of ONNX runtime](https://github.com/microsoft/onnxruntime/issues/15080), the peak memory usage of the service is much higher than the model file size. 
+e.g. For the default 500MB model file, the peak memory usage could up to 1.8GB - 2GB.
+However, the memory usage will drop back to much lower (for default model, it's aroudn 800MB-900MB) after the model is loaded.
+Please make sure your Kubernetes cluster has enough resources to run the service.
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesHeader" . }}
+
+{{ template "chart.valuesTable" . }}
+
 ### Build & Run for Local Development
 
 > Please note: for production deployment, please use the released [Docker images](https://github.com/magda-io/magda-embedding-api/pkgs/container/magda-embedding-api) & [helm charts](https://github.com/magda-io/magda-embedding-api/pkgs/container/charts%2Fmagda-embedding-api).
@@ -54,11 +69,3 @@ Deploy to minikube Cluster
 ```bash
 helm -n test upgrade --install test ./deploy/magda-embedding-api -f ./deploy/test-deploy.yaml
 ```
-
-{{ template "chart.maintainersSection" . }}
-
-{{ template "chart.requirementsSection" . }}
-
-{{ template "chart.valuesHeader" . }}
-
-{{ template "chart.valuesTable" . }}

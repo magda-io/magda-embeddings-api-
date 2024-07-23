@@ -161,4 +161,7 @@ resources:
     cpu: "100m"
     memory: "850M"
   limits:
+    # -- (string) the memory limit of the container
+    # Due to [this issue of ONNX runtime](https://github.com/microsoft/onnxruntime/issues/15080), the peak memory usage of the service is much higher than the model file size. 
+    # When change the default model, be sure to test the peak memory usage of the service before setting the memory limit.
     memory: "2000M"
