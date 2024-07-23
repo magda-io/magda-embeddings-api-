@@ -65,17 +65,15 @@ class EmbeddingGenerator {
             ...pretrainedOptions
         };
 
-        const creationTasks = [
-            this.pipelineLayout.tokenizer.from_pretrained(
-                model,
-                pretrainedOptions
-            ),
-            this.pipelineLayout.model.from_pretrained(model, pretrainedOptions)
-        ] as [Promise<PreTrainedTokenizer>, Promise<PreTrainedModel>];
-
-        await Promise.all(creationTasks);
-        this.tokenizer = await creationTasks[0];
-        this.model = await creationTasks[1];
+        // Load tokenizer and model one by one to reduce peak memory usage
+        this.tokenizer = await this.pipelineLayout.tokenizer.from_pretrained(
+            model,
+            pretrainedOptions
+        );
+        this.model = await this.pipelineLayout.model.from_pretrained(
+            model,
+            pretrainedOptions
+        );
     }
 
     private async featureExtraction(
