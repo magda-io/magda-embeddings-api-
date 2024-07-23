@@ -9,7 +9,7 @@ RUN mkdir -p /usr/src/app /etc/config && \
 
 COPY . /usr/src/app
 RUN cd /usr/src/app/component/node_modules/onnxruntime-node && npm run postinstall
-RUN cd /usr/src/app/component/node_modules/sharp && node run clean && node install/libvips && node install/dll-copy && node ../prebuild-install/bin.js
+RUN cd /usr/src/app/component/node_modules/sharp && npm run clean && node install/libvips && node install/dll-copy && node ../prebuild-install/bin.js
 
 USER 1001
 WORKDIR /usr/src/app/component
