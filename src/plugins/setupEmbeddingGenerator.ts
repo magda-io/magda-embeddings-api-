@@ -18,7 +18,9 @@ const WAIT_TIME_MS = 500;
 // to export the decorators to the outer scope
 export default fp<SupportPluginOptions>(
     async (fastify, opts) => {
-        const embeddingGenerator = new EmbeddingGenerator();
+        const embeddingGenerator = new EmbeddingGenerator(
+            fastify?.appConfig?.modelList
+        );
         fastify.decorate("embeddingGenerator", embeddingGenerator);
 
         fastify.addHook("onRequest", function (request, reply, next) {
@@ -43,6 +45,6 @@ export default fp<SupportPluginOptions>(
     {
         fastify: "4.x",
         name: "setupEmbeddingGenerator",
-        dependencies: ["@fastify/sensible"]
+        dependencies: ["@fastify/sensible", "loadAppConfig"]
     }
 );

@@ -1,11 +1,6 @@
 import { FastifyPluginAsync } from "fastify";
 import { Type } from "@sinclair/typebox";
-import { StringEnum } from "../../../libs/types.js";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
-import {
-    supportModels,
-    defaultModel
-} from "../../../libs/EmbeddingGenerator.js";
 
 const schemaEmebeddingObject = Type.Object({
     index: Type.Integer(),
@@ -22,7 +17,7 @@ const schema = {
         200: Type.Object({
             object: Type.Const("list"),
             data: Type.Array(schemaEmebeddingObject),
-            model: StringEnum(supportModels),
+            model: Type.String(),
             usage: Type.Object({
                 prompt_tokens: Type.Integer(),
                 total_tokens: Type.Integer()
@@ -38,6 +33,7 @@ const embeddings: FastifyPluginAsync = async (
     const fastify = fastifyInstance.withTypeProvider<TypeBoxTypeProvider>();
 
     fastify.post("/", { schema }, async function (request, reply) {
+        const supportModels = this.embeddingGenerator.supportModels;
         if (
             request.body.model &&
             supportModels.indexOf(request.body.model) === -1
@@ -46,7 +42,8 @@ const embeddings: FastifyPluginAsync = async (
                 `Model \`${request.body.model}\` is not supported. Supported models: ${supportModels.join(", ")}`
             );
         }
-        const model = request.body.model || defaultModel;
+        const model =
+            request.body.model || fastify.embeddingGenerator.defaultModelName;
         const inputItems = Array.isArray(request.body.input)
             ? request.body.input
             : [request.body.input];

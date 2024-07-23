@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import * as assert from "node:assert";
-import { defaultModel } from "../src/libs/EmbeddingGenerator.js";
 import { build } from "./helper.js";
+import { defaultModel } from "../src/libs/EmbeddingGenerator.js";
 import { OpenAIEmbeddings } from "@langchain/openai";
 
 test("Should work with @langchain/openai", async (t) => {
@@ -10,7 +10,8 @@ test("Should work with @langchain/openai", async (t) => {
 
     const embeddings = new OpenAIEmbeddings({
         verbose: true,
-        model: defaultModel,
+        model:
+            typeof defaultModel === "string" ? defaultModel : defaultModel.name,
         configuration: {
             baseURL: `http://localhost:${fastify.server.address().port}/v1`
         },

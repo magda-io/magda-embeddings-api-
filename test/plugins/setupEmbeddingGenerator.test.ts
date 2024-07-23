@@ -1,6 +1,7 @@
 import t from "tap";
 import Fastify from "fastify";
 import sensible from "@fastify/sensible";
+import loadAppConfig from "../../src/plugins/loadAppConfig.js";
 import type SetupEmbeddingGeneratorType from "../../src/plugins/setupEmbeddingGenerator.js";
 import { MockEmbeddingGenerator } from "../helper.js";
 
@@ -13,6 +14,7 @@ const SetupEmbeddingGenerator = await t.mockImport<
 t.test("should works for child plugin routes", async (t) => {
     const fastify = Fastify();
     fastify.register(sensible);
+    fastify.register(loadAppConfig);
     fastify.register(SetupEmbeddingGenerator);
     fastify.register(async (fastify, opts) => {
         fastify.get("/test", async function (request, reply) {
@@ -35,6 +37,7 @@ t.test(
     async (t) => {
         const fastify = Fastify();
         fastify.register(sensible);
+        fastify.register(loadAppConfig);
         fastify.register(SetupEmbeddingGenerator);
         fastify.register(async (fastify, opts) => {
             fastify.get("/test", async function (request, reply) {
@@ -63,6 +66,7 @@ t.test(
     async (t) => {
         const fastify = Fastify();
         fastify.register(sensible);
+        fastify.register(loadAppConfig);
         fastify.register(SetupEmbeddingGenerator);
         fastify.register(async (fastify, opts) => {
             fastify.get("/status/ready", async function (request, reply) {

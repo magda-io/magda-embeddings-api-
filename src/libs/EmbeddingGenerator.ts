@@ -11,8 +11,25 @@ import {
     PretrainedOptions
 } from "@xenova/transformers";
 
-export const supportModels = ["Alibaba-NLP/gte-base-en-v1.5"];
-export const defaultModel = "Alibaba-NLP/gte-base-en-v1.5";
+export const defaultModel = {
+    name: "Alibaba-NLP/gte-base-en-v1.5",
+    quantized: false
+};
+
+export interface ModelItem {
+    name: string;
+    // whether or not this model is the default model
+    // if all models are not default, the first one will be used as default
+    default?: boolean;
+    quantized?: boolean | null;
+    config?: any;
+    cache_dir?: string;
+    local_files_only?: boolean;
+    revision?: string;
+    model_file_name?: string;
+}
+
+export type ModelListItem = string | ModelItem;
 
 class EmbeddingGenerator {
     protected ready: boolean = false;
@@ -21,20 +38,78 @@ class EmbeddingGenerator {
     private tokenizer: PreTrainedTokenizer | null = null;
     private model: PreTrainedModel | null = null;
 
+    private supportModelNames: string[] = [];
+    // although we allow user to pass in a list of models, we only use the first one (default model) is used for now
+    private defaultModel: string = "";
+    private modelList: ModelListItem[] = [defaultModel];
+
     private pipelineLayout = {
         tokenizer: AutoTokenizer,
-        model: AutoModel,
-        default: {
-            model: defaultModel
-        }
+        model: AutoModel
     };
 
-    constructor() {
+    constructor(modelList: ModelListItem[] = []) {
+        if (modelList?.length) {
+            this.modelList = [...modelList];
+        }
+        this.processModelList();
         this.readPromise = this.init();
     }
 
+    /**
+     * Process this.modelList and set this.defaultModel and this.supportModelNames
+     *
+     * @private
+     * @memberof EmbeddingGenerator
+     */
+    private processModelList() {
+        const modelNames: string[] = [];
+        let defaultModel: string = "";
+
+        for (const model of this.modelList) {
+            if (typeof model === "string") {
+                modelNames.push(model);
+            } else {
+                if (typeof model.name !== "string") {
+                    throw new Error(
+                        "Invalid model list supplied, when list item is not a string, it must contain a string `name` field"
+                    );
+                }
+                modelNames.push(model.name);
+                if (model?.default === true) {
+                    defaultModel = model.name;
+                }
+            }
+        }
+        if (!defaultModel) {
+            defaultModel = modelNames[0];
+        }
+
+        this.defaultModel = defaultModel;
+        this.supportModelNames = modelNames;
+    }
+
+    private getModelByName(modelName: string): ModelItem {
+        for (const model of this.modelList) {
+            if (typeof model === "string") {
+                if (model === modelName) {
+                    return {
+                        name: modelName
+                    };
+                }
+            } else if (model?.name === modelName) {
+                return model;
+            }
+        }
+        throw new Error(`Model \`${modelName}\` not found`);
+    }
+
     get supportModels() {
-        return supportModels;
+        return this.supportModelNames;
+    }
+
+    get defaultModelName() {
+        return this.defaultModel;
     }
 
     isReady() {
@@ -49,8 +124,8 @@ class EmbeddingGenerator {
         model: string | null = null,
         pretrainedOptions: PretrainedOptions = {}
     ) {
-        if (model === null) {
-            model = this.pipelineLayout.default.model;
+        if (!model) {
+            model = this.defaultModel;
         }
 
         const defaultPretrainedOptions = {
@@ -129,10 +204,22 @@ class EmbeddingGenerator {
 
     protected async init() {
         // Create feature extraction pipeline
-        await this.createPipeline("Alibaba-NLP/gte-base-en-v1.5", {
-            quantized: false // Comment out this line to use the quantized version
-        });
+        const { name: modelName, ...modelOpts } = this.getModelByName(
+            this.defaultModel
+        );
+        await this.createPipeline(modelName, modelOpts);
         this.ready = true;
+    }
+
+    async switchModel(model: string = this.defaultModel) {
+        if (model && this.supportModels.indexOf(model) === -1) {
+            throw new Error(
+                `Model \`${model}\` is not supported. Supported models: ${this.supportModels.join(", ")}`
+            );
+        }
+        const { name: modelName, ...modelOpts } = this.getModelByName(model);
+        await this.dispose();
+        await this.createPipeline(modelName, modelOpts);
     }
 
     async dispose() {
@@ -141,7 +228,10 @@ class EmbeddingGenerator {
         }
     }
 
-    async generate(sentences: string | string[], model: string = defaultModel) {
+    async generate(
+        sentences: string | string[],
+        model: string = this.defaultModel
+    ) {
         if (model && this.supportModels.indexOf(model) === -1) {
             throw new Error(
                 `Model \`${model}\` is not supported. Supported models: ${this.supportModels.join(", ")}`
@@ -160,7 +250,7 @@ class EmbeddingGenerator {
 
     async tokenize(
         texts: string | string[],
-        model: string = defaultModel,
+        model: string = this.defaultModel,
         opts: {
             text_pair?: string | string[];
             padding?: boolean | "max_length";
