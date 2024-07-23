@@ -19,6 +19,42 @@ An embedding is a vector, or a list, of floating-point numbers. The distance bet
 
 This embedding API is created for [Magda](https://github.com/magda-io/magda)'s vector / hybrid search solution. The API interface is compatible with OpenAI's `embeddings` API to make it easier to reuse existing tools & libraries.
 
+### Build & Run for Local Development
+
+> Please note: for production deployment, please use the released [Docker images](https://github.com/magda-io/magda-embedding-api/pkgs/container/magda-embedding-api) & [helm charts](https://github.com/magda-io/magda-embedding-api/pkgs/container/charts%2Fmagda-embedding-api).
+
+#### Prerequisites
+
+- Node.js 18.x
+- [Minikube](https://minikube.sigs.k8s.io/) (for local Kubernetes development)
+  - [Minikube addons Registry & Registry Aliases are requried](https://minikube.sigs.k8s.io/docs/handbook/addons/registry-aliases/)
+
+#### Install dependencies
+
+```bash
+yarn install
+```
+
+#### Run the service locally
+
+```bash
+yarn start
+```
+
+#### Build Docker Image, Push into local Registry & Deploy to minikube Cluster
+
+
+```bash
+yarn build
+yarn docker-build-local
+```
+
+Deploy to minikube Cluster
+
+```bash
+helm -n test upgrade --install test ./deploy/magda-embedding-api -f ./deploy/test-deploy.yaml
+```
+
 {{ template "chart.maintainersSection" . }}
 
 {{ template "chart.requirementsSection" . }}

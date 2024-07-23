@@ -19,6 +19,41 @@ An embedding is a vector, or a list, of floating-point numbers. The distance bet
 
 This embedding API is created for [Magda](https://github.com/magda-io/magda)'s vector / hybrid search solution. The API interface is compatible with OpenAI's `embeddings` API to make it easier to reuse existing tools & libraries.
 
+### Build & Run for Local Development
+
+> Please note: for production deployment, please use the released [Docker images](https://github.com/magda-io/magda-embedding-api/pkgs/container/magda-embedding-api) & [helm charts](https://github.com/magda-io/magda-embedding-api/pkgs/container/charts%2Fmagda-embedding-api).
+
+#### Prerequisites
+
+- Node.js 18.x
+- [Minikube](https://minikube.sigs.k8s.io/) (for local Kubernetes development)
+  - [Minikube addons Registry & Registry Aliases are requried](https://minikube.sigs.k8s.io/docs/handbook/addons/registry-aliases/)
+
+#### Install dependencies
+
+```bash
+yarn install
+```
+
+#### Run the service locally
+
+```bash
+yarn start
+```
+
+#### Build Docker Image, Push into local Registry & Deploy to minikube Cluster
+
+```bash
+yarn build
+yarn docker-build-local
+```
+
+Deploy to minikube Cluster
+
+```bash
+helm -n test upgrade --install test ./deploy/magda-embedding-api -f ./deploy/test-deploy.yaml
+```
+
 ## Requirements
 
 Kubernetes: `>= 1.21.0`
@@ -82,9 +117,9 @@ Kubernetes: `>= 1.21.0`
 | readinessProbe.successThreshold    | int    | `1`                            |                                                                                                                                                                                                                                       |
 | readinessProbe.timeoutSeconds      | int    | `5`                            |                                                                                                                                                                                                                                       |
 | replicas                           | int    | `1`                            |                                                                                                                                                                                                                                       |
-| resources.limits.memory            | string | `"512M"`                       |                                                                                                                                                                                                                                       |
+| resources.limits.memory            | string | `"2000M"`                      |                                                                                                                                                                                                                                       |
 | resources.requests.cpu             | string | `"100m"`                       |                                                                                                                                                                                                                                       |
-| resources.requests.memory          | string | `"512M"`                       |                                                                                                                                                                                                                                       |
+| resources.requests.memory          | string | `"850M"`                       |                                                                                                                                                                                                                                       |
 | service.annotations                | object | `{}`                           |                                                                                                                                                                                                                                       |
 | service.httpPortName               | string | `"http"`                       |                                                                                                                                                                                                                                       |
 | service.labels                     | object | `{}`                           |                                                                                                                                                                                                                                       |

@@ -1,0 +1,6 @@
+image:
+  # you can use minikube Registry Aliases Addon to setup the registry alias example.com in local test cluster
+  # https://minikube.sigs.k8s.io/docs/handbook/addons/registry-aliases/
+  repository: example.com
+  tag: latest
+  pullPolicy: Always

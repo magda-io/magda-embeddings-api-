@@ -131,14 +131,14 @@ spec:
         {{- end }}
         {{- if .Values.pluginTimeout }}
         - name: FASTIFY_PLUGIN_TIMEOUT
-          value: {{ .Values.pluginTimeout | quote }}
+          value: {{ .Values.pluginTimeout | int | quote }}
         {{- end }}
         - name: FASTIFY_LOG_LEVEL
           value: {{ .Values.logLevel | quote }}
         - name: FASTIFY_BODY_LIMIT
-          value: {{ .Values.bodyLimit | quote }}
+          value: {{ .Values.bodyLimit | int | quote }}
         - name: FASTIFY_CLOSE_GRACE_DELAY
-          value: {{ .Values.closeGraceDelay | quote }}
+          value: {{ .Values.closeGraceDelay | int | quote }}
 {{- if .Values.extraEnvs }}
 {{ toYaml .Values.extraEnvs | indent 8 }}
 {{- end }}
