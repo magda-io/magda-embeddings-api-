@@ -40,13 +40,13 @@
   "dependencies": {
     "@fastify/autoload": "^5.10.0",
     "@fastify/sensible": "^5.6.0",
+    "@fastify/type-provider-typebox": "^4.0.0",
+    "@sinclair/typebox": "^0.32.34",
     "@xenova/transformers": "^2.17.2",
-    "onnxruntime-node": "^1.14.0",
     "fastify": "^4.28.1",
     "fastify-cli": "^6.2.1",
     "fastify-plugin": "^4.5.1",
-    "@fastify/type-provider-typebox": "^4.0.0",
-    "@sinclair/typebox": "^0.32.34"
+    "onnxruntime-node": "^1.14.0"
   },
   "devDependencies": {
     "@langchain/openai": "^0.2.1",
