@@ -11,9 +11,28 @@ import {
     PretrainedOptions
 } from "@xenova/transformers";
 
-export const defaultModel = {
+export interface ExtractionConfig {
+    pooling?: "none" | "mean" | "cls";
+    normalize?: boolean;
+    quantize?: boolean;
+    precision?: "binary" | "ubinary";
+}
+
+export const defaultModel: ModelItem = {
     name: "Alibaba-NLP/gte-base-en-v1.5",
-    quantized: true
+    quantized: true,
+    extraction_config: {
+        pooling: "cls",
+        normalize: true,
+        quantize: false
+    }
+};
+
+export const DEFAULT_EXTRACTION_CONFIG: ExtractionConfig = {
+    pooling: "cls",
+    normalize: true,
+    quantize: false,
+    precision: "binary"
 };
 
 export interface ModelItem {
@@ -27,9 +46,10 @@ export interface ModelItem {
     local_files_only?: boolean;
     revision?: string;
     model_file_name?: string;
+    extraction_config?: ExtractionConfig;
 }
 
-export type ModelListItem = string | ModelItem;
+export type ConfigModelListItem = string | ModelItem;
 
 class EmbeddingGenerator {
     protected ready: boolean = false;
@@ -38,37 +58,45 @@ class EmbeddingGenerator {
     private tokenizer: PreTrainedTokenizer | null = null;
     private model: PreTrainedModel | null = null;
 
-    private supportModelNames: string[] = [];
+    private supportModelNames: string[] = [defaultModel.name];
     // although we allow user to pass in a list of models, we only use the first one (default model) is used for now
-    private defaultModel: string = "";
-    private modelList: ModelListItem[] = [defaultModel];
+    private defaultModel: string = defaultModel.name;
+    private modelList: ModelItem[] = [{ ...defaultModel }];
 
     private pipelineLayout = {
         tokenizer: AutoTokenizer,
         model: AutoModel
     };
 
-    constructor(modelList: ModelListItem[] = []) {
-        if (modelList?.length) {
-            this.modelList = [...modelList];
+    constructor(modelListConfig: ConfigModelListItem[] = []) {
+        if (modelListConfig?.length) {
+            this.processModelList(modelListConfig);
         }
-        this.processModelList();
         this.readPromise = this.init();
     }
 
     /**
-     * Process this.modelList and set this.defaultModel and this.supportModelNames
+     * Given modelList: ModelListItem[]:
+     * - process it & convert to ModelItem[]
+     * In the process, we will also :
+     * - set process result to this.modelList
+     * - set this.defaultModel and this.supportModelNames
      *
      * @private
      * @memberof EmbeddingGenerator
      */
-    private processModelList() {
+    private processModelList(modelList: ConfigModelListItem[]) {
         const modelNames: string[] = [];
+        const modelItems: ModelItem[] = [];
         let defaultModel: string = "";
 
-        for (const model of this.modelList) {
+        for (const model of modelList) {
             if (typeof model === "string") {
                 modelNames.push(model);
+                modelItems.push({
+                    name: model,
+                    extraction_config: { ...DEFAULT_EXTRACTION_CONFIG }
+                });
             } else {
                 if (typeof model.name !== "string") {
                     throw new Error(
@@ -79,6 +107,15 @@ class EmbeddingGenerator {
                 if (model?.default === true) {
                     defaultModel = model.name;
                 }
+                modelItems.push({
+                    ...model,
+                    extraction_config: {
+                        ...DEFAULT_EXTRACTION_CONFIG,
+                        ...(model?.extraction_config
+                            ? model.extraction_config
+                            : {})
+                    }
+                });
             }
         }
         if (!defaultModel) {
@@ -87,21 +124,17 @@ class EmbeddingGenerator {
 
         this.defaultModel = defaultModel;
         this.supportModelNames = modelNames;
+        this.modelList = modelItems;
     }
 
     private getModelByName(modelName: string): ModelItem {
-        for (const model of this.modelList) {
-            if (typeof model === "string") {
-                if (model === modelName) {
-                    return {
-                        name: modelName
-                    };
-                }
-            } else if (model?.name === modelName) {
-                return model;
-            }
+        const foundModel = this.modelList.find(
+            (item) => item.name === modelName
+        );
+        if (!foundModel) {
+            throw new Error(`Cannot find model \`${modelName}\`.`);
         }
-        throw new Error(`Model \`${modelName}\` not found`);
+        return foundModel;
     }
 
     get supportModels() {
@@ -204,20 +237,21 @@ class EmbeddingGenerator {
 
     protected async init() {
         // Create feature extraction pipeline
-        const { name: modelName, ...modelOpts } = this.getModelByName(
-            this.defaultModel
-        );
+        const {
+            name: modelName,
+            extraction_config,
+            ...modelOpts
+        } = this.getModelByName(this.defaultModel);
         await this.createPipeline(modelName, modelOpts);
         this.ready = true;
     }
 
     async switchModel(model: string = this.defaultModel) {
-        if (model && this.supportModels.indexOf(model) === -1) {
-            throw new Error(
-                `Model \`${model}\` is not supported. Supported models: ${this.supportModels.join(", ")}`
-            );
-        }
-        const { name: modelName, ...modelOpts } = this.getModelByName(model);
+        const {
+            name: modelName,
+            extraction_config,
+            ...modelOpts
+        } = this.getModelByName(model);
         await this.dispose();
         await this.createPipeline(modelName, modelOpts);
     }
@@ -232,14 +266,10 @@ class EmbeddingGenerator {
         sentences: string | string[],
         model: string = this.defaultModel
     ) {
-        if (model && this.supportModels.indexOf(model) === -1) {
-            throw new Error(
-                `Model \`${model}\` is not supported. Supported models: ${this.supportModels.join(", ")}`
-            );
-        }
+        const { extraction_config } = this.getModelByName(model);
+
         const output = await this.featureExtraction(sentences, {
-            normalize: true,
-            pooling: "cls"
+            ...extraction_config
         });
 
         const embeddings = output[0].tolist() as number[][];

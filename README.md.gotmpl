@@ -31,6 +31,8 @@ Please make sure your Kubernetes cluster has enough resources to run the service
 
 When specify `appConfig.modelList`, you can set `quantized` to `false` to use a quantized model. Please refer to helm chart document below for more informaiton. You can also find an example from this config file [here](./deploy/test-deploy.yaml).
 
+> Memory consumption test result for a few selected models can be found: https://github.com/magda-io/magda-embedding-api/issues/2
+
 {{ template "chart.maintainersSection" . }}
 
 {{ template "chart.requirementsSection" . }}

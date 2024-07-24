@@ -39,8 +39,14 @@ closeGraceDelay: 25000
 # - `config` (object): Optional; The configuration object that will be passed to the model. 
 # - `cache_dir` (string): Optional; The cache directory of the downloaded models. If not specified, the default cache directory will be used.
 # - `local_files_only` (bool): Optional; Whether to only load the model from local files. If not specified, the model will be downloaded from the huggingface model hub.
-# - `revision` (string) Optional; 
-# - `model_file_name` (string) Optional; 
+# - `revision` (string) Optional, Default to 'main'; The specific model version to use. It can be a branch name, a tag name, or a commit id. 
+#   Since we use a git-based system for storing models and other artifacts on huggingface.co, so `revision` can be any identifier allowed by git. NOTE: This setting is ignored for local requests.
+# - `model_file_name` (string) Optional;
+# - `extraction_config` (object) Optional; The configuration object that will be passed to the model extraction function for embedding generation.
+#   - `pooling``: ('none'|'mean'|'cls') Default to 'none'. The pooling method to use.
+#   - `normalize`: (bool) Default to true. Whether or not to normalize the embeddings in the last dimension.
+#   - `quantize`: (bool) Default to `false`. Whether or not to quantize the embeddings.
+#   - `precision`: ("binary" | "ubinary") default to "binary". The precision to use for quantization. Only used when `quantize` is true.
 # Please note: The released docker image only contains "Alibaba-NLP/gte-base-en-v1.5" model. 
 # If you specify other models, the server will download the model from the huggingface model hub at the startup.
 # You might want to adjust the `startupProbe` settings to accommodate the model downloading time.
