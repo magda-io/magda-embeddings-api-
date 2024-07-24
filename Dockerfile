@@ -8,9 +8,13 @@ RUN mkdir -p /usr/src/app /etc/config && \
     chmod -R g=u /usr/src/app /etc/config
 
 COPY . /usr/src/app
+# make local cache folder writable by 1000 user
+RUN chown -R 1000 /usr/src/app/component/node_modules/@xenova/transformers/.cache
+# Reinstall onnxruntime-node based on current building platform architecture
 RUN cd /usr/src/app/component/node_modules/onnxruntime-node && npm run postinstall
+# Reinstall sharp based on current building platform architecture
 RUN cd /usr/src/app/component/node_modules/sharp && npm run clean && node install/libvips && node install/dll-copy && node ../prebuild-install/bin.js
 
-USER 1001
+USER 1000
 WORKDIR /usr/src/app/component
 CMD [ "node", "./node_modules/fastify-cli/cli.js", "start", "-l", "info", "dist/app.js"]

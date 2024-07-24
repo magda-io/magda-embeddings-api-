@@ -79,6 +79,7 @@ autoscaling:
 priorityClassName: magda-9
 
 podSecurityContext:
+  runAsNonRoot: true
   runAsUser: 1000
 
 rbac:
@@ -179,9 +180,12 @@ podAnnotations: {}
 resources:
   requests:
     cpu: "100m"
-    memory: "850M"
+    # -- (string) the memory request of the container
+    # Once the model is loaded, the memory usage of the service for serving request would be much lower. Set to 650M for default model.
+    memory: "650M"
   limits:
     # -- (string) the memory limit of the container
     # Due to [this issue of ONNX runtime](https://github.com/microsoft/onnxruntime/issues/15080), the peak memory usage of the service is much higher than the model file size. 
     # When change the default model, be sure to test the peak memory usage of the service before setting the memory limit.
-    memory: "2000M"
+    # quantized model will be used by default, the memory limit is set to 1100M to accommodate the default model size.
+    memory: "1100M"

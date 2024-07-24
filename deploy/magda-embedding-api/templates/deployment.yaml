@@ -22,7 +22,7 @@ spec:
     metadata:
       labels:
         {{- include "magda.common.labels.standard" . | nindent 8 }}
-      {{- if or (empty .Values.podAnnotations | not) (empty .Values.config | not) }}
+      {{- if or (empty .Values.podAnnotations | not) (empty .Values.appConfig | not) }}
       annotations:
         {{- range $key, $value := .Values.podAnnotations }}
         {{ $key }}: {{ $value | quote }}
@@ -49,9 +49,9 @@ spec:
       hostAliases: {{ toYaml .Values.hostAliases | nindent 6 }}
       {{- end }}
       volumes:
-        - name: appConfig
+        - name: appconfig
           configMap:
-            name: "{{ template "magda.fullname" . }}-appConfig"
+            name: "{{ template "magda.fullname" . }}-appconfig"
             items:
             - key: appConfig.json
               path: appConfig.json
@@ -104,6 +104,9 @@ spec:
         - "./node_modules/fastify-cli/cli.js"
         - "start"
         - "dist/app.js"
+        - "--"
+        - "--appConfigFile"
+        - "/etc/config/appConfig.json"
         {{- if .Values.readinessProbe }}
         readinessProbe:
 {{ toYaml .Values.readinessProbe | indent 10 }}
@@ -153,7 +156,7 @@ spec:
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         volumeMounts:
-          - name: appConfig
+          - name: appconfig
             mountPath: /etc/config/appConfig.json
             subPath: appConfig.json
           {{- if .Values.extraVolumeMounts }}

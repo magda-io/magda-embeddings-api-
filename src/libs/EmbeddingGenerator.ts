@@ -13,7 +13,7 @@ import {
 
 export const defaultModel = {
     name: "Alibaba-NLP/gte-base-en-v1.5",
-    quantized: false
+    quantized: true
 };
 
 export interface ModelItem {
