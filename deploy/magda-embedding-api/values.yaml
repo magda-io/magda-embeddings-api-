@@ -9,9 +9,8 @@ debug: false
 # -- (string) The log level of the application.
 # one of 'fatal', 'error', 'warn', 'info', 'debug', 'trace'; 
 # also 'silent' is supported to disable logging. 
-# Any other value defines a custom level and requires supplying a level value via levelVal. 
-# @default -- `info`.
-logLevel: "info"
+# Any other value defines a custom level and requires supplying a level value via levelVal.
+logLevel: "warn"
 
 # -- (int) The maximum amount of time in milliseconds in which a fastify plugin can load. 
 # If not, ready will complete with an Error with code 'ERR_AVVIO_PLUGIN_TIMEOUT'.

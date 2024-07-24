@@ -20,3 +20,6 @@ appConfig:
     # set quantized to false to use the non-quantized version of the model
     # by default, the quantized version of the model will be used
     quantized: true
+    extraction_config:
+      pooling: "mean"
+      normalize: true
