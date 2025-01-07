@@ -9,7 +9,7 @@ import {
     FeatureExtractionPipelineOptions,
     mean_pooling,
     PretrainedOptions
-} from "@xenova/transformers";
+} from "@huggingface/transformers";
 
 export interface ExtractionConfig {
     pooling?: "none" | "mean" | "cls";

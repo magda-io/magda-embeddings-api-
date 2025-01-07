@@ -9,7 +9,7 @@ RUN mkdir -p /usr/src/app /etc/config && \
 
 COPY . /usr/src/app
 # make local cache folder writable by 1000 user
-RUN chown -R 1000 /usr/src/app/component/node_modules/@xenova/transformers/.cache
+RUN chown -R 1000 /usr/src/app/component/node_modules/@huggingface/transformers/.cache
 # Reinstall onnxruntime-node based on current building platform architecture
 RUN cd /usr/src/app/component/node_modules/onnxruntime-node && npm run postinstall
 # Reinstall sharp based on current building platform architecture
