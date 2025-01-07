@@ -75,7 +75,7 @@
     "exclude": [
       "test/helper.ts"
     ],
-    "timeout": 120,
+    "timeout": 12000,
     "jobs": 1
   },
   "config": {

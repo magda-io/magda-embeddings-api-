@@ -81,7 +81,7 @@ Kubernetes: `>= 1.21.0`
 | logLevel | string | `"warn"` | The log level of the application. one of 'fatal', 'error', 'warn', 'info', 'debug', 'trace';  also 'silent' is supported to disable logging.  Any other value defines a custom level and requires supplying a level value via levelVal. |
 | nameOverride | string | `""` |  |
 | nodeSelector | object | `{}` |  |
-| pluginTimeout | int | Default to 10000 (10 seconds). | The maximum amount of time in milliseconds in which a fastify plugin can load.  If not, ready will complete with an Error with code 'ERR_AVVIO_PLUGIN_TIMEOUT'. |
+| pluginTimeout | int | Default to 180000 (180 seconds). | The maximum amount of time in milliseconds in which a fastify plugin can load.  If not, ready will complete with an Error with code 'ERR_AVVIO_PLUGIN_TIMEOUT'. |
 | podAnnotations | object | `{}` |  |
 | podSecurityContext.runAsNonRoot | bool | `true` |  |
 | podSecurityContext.runAsUser | int | `1000` |  |
@@ -98,9 +98,9 @@ Kubernetes: `>= 1.21.0`
 | readinessProbe.successThreshold | int | `1` |  |
 | readinessProbe.timeoutSeconds | int | `5` |  |
 | replicas | int | `1` |  |
-| resources.limits.memory | string | `"1100M"` | the memory limit of the container Due to [this issue of ONNX runtime](https://github.com/microsoft/onnxruntime/issues/15080), the peak memory usage of the service is much higher than the model file size.  When change the default model, be sure to test the peak memory usage of the service before setting the memory limit. quantized model will be used by default, the memory limit is set to 1100M to accommodate the default model size. |
+| resources.limits.memory | string | `"2000M"` | the memory limit of the container Due to [this issue of ONNX runtime](https://github.com/microsoft/onnxruntime/issues/15080), the peak memory usage of the service is much higher than the model file size.  When change the default model, be sure to test the peak memory usage of the service before setting the memory limit. non-quantized model will be used by default, the memory limit is set to 2000M to accommodate the default non-quantized perk memory usage during the initial loading. If you use a quantized model, you can set the memory limit to a lower value (1100M peak memory would be sufficient). |
 | resources.requests.cpu | string | `"100m"` |  |
-| resources.requests.memory | string | `"650M"` | the memory request of the container Once the model is loaded, the memory usage of the service for serving request would be much lower. Set to 650M for default model. |
+| resources.requests.memory | string | `"850M"` | the memory request of the container Once the model is loaded, the memory usage of the service for serving request would be much lower. Set to 850M for default model. |
 | service.annotations | object | `{}` |  |
 | service.httpPortName | string | `"http"` |  |
 | service.labels | object | `{}` |  |

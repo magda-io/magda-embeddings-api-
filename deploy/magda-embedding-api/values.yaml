@@ -191,11 +191,12 @@ resources:
   requests:
     cpu: "100m"
     # -- (string) the memory request of the container
-    # Once the model is loaded, the memory usage of the service for serving request would be much lower. Set to 650M for default model.
-    memory: "650M"
+    # Once the model is loaded, the memory usage of the service for serving request would be much lower. Set to 850M for default model.
+    memory: "850M"
   limits:
     # -- (string) the memory limit of the container
     # Due to [this issue of ONNX runtime](https://github.com/microsoft/onnxruntime/issues/15080), the peak memory usage of the service is much higher than the model file size. 
     # When change the default model, be sure to test the peak memory usage of the service before setting the memory limit.
-    # quantized model will be used by default, the memory limit is set to 1100M to accommodate the default model size.
-    memory: "1100M"
+    # non-quantized model will be used by default, the memory limit is set to 2000M to accommodate the default non-quantized perk memory usage during the initial loading.
+    # If you use a quantized model, you can set the memory limit to a lower value (1100M peak memory would be sufficient).
+    memory: "2000M"
