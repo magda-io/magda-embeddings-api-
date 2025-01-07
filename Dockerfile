@@ -13,7 +13,7 @@ RUN chown -R 1000 /usr/src/app/component/node_modules/@huggingface/transformers/
 # Reinstall onnxruntime-node based on current building platform architecture
 RUN cd /usr/src/app/component/node_modules/onnxruntime-node && npm run postinstall
 # Reinstall sharp based on current building platform architecture
-RUN cd /usr/src/app/component/node_modules && rm -Rf @img && cd sharp && npm run clean && npm run install
+RUN cd /usr/src/app/component/node_modules && rm -Rf @img && cd sharp && npm install
 
 USER 1000
 WORKDIR /usr/src/app/component
