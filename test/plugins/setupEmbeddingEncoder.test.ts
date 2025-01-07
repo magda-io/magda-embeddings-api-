@@ -2,23 +2,23 @@ import t from "tap";
 import Fastify from "fastify";
 import sensible from "@fastify/sensible";
 import loadAppConfig from "../../src/plugins/loadAppConfig.js";
-import type SetupEmbeddingGeneratorType from "../../src/plugins/setupEmbeddingGenerator.js";
-import { MockEmbeddingGenerator } from "../helper.js";
+import type SetupEmbeddingEncoderType from "../../src/plugins/setupEmbeddingEncoder.js";
+import { MockEmbeddingEncoder } from "../helper.js";
 
-const SetupEmbeddingGenerator = await t.mockImport<
-    typeof SetupEmbeddingGeneratorType
->("../../src/plugins/setupEmbeddingGenerator.js", {
-    "../../src/libs/EmbeddingGenerator.js": MockEmbeddingGenerator
+const SetupEmbeddingEncoder = await t.mockImport<
+    typeof SetupEmbeddingEncoderType
+>("../../src/plugins/setupEmbeddingEncoder.js", {
+    "../../src/libs/EmbeddingEncoder.js": MockEmbeddingEncoder
 });
 
 t.test("should works for child plugin routes", async (t) => {
     const fastify = Fastify();
     fastify.register(sensible);
     fastify.register(loadAppConfig);
-    fastify.register(SetupEmbeddingGenerator);
+    fastify.register(SetupEmbeddingEncoder);
     fastify.register(async (fastify, opts) => {
         fastify.get("/test", async function (request, reply) {
-            if (typeof this.embeddingGenerator === "object") {
+            if (typeof this.embeddingEncoder === "object") {
                 return { hasPlugin: true };
             } else {
                 return { hasPlugin: false };
@@ -38,10 +38,10 @@ t.test(
         const fastify = Fastify();
         fastify.register(sensible);
         fastify.register(loadAppConfig);
-        fastify.register(SetupEmbeddingGenerator);
+        fastify.register(SetupEmbeddingEncoder);
         fastify.register(async (fastify, opts) => {
             fastify.get("/test", async function (request, reply) {
-                if (typeof this.embeddingGenerator === "object") {
+                if (typeof this.embeddingEncoder === "object") {
                     return { hasPlugin: true };
                 } else {
                     return { hasPlugin: false };
@@ -53,7 +53,7 @@ t.test(
             url: "/test"
         });
         t.same(JSON.parse(res.payload), { hasPlugin: true });
-        (fastify.embeddingGenerator as any).setReady(false);
+        (fastify.embeddingEncoder as any).setReady(false);
         const res2 = await fastify.inject({
             url: "/test"
         });
@@ -67,10 +67,10 @@ t.test(
         const fastify = Fastify();
         fastify.register(sensible);
         fastify.register(loadAppConfig);
-        fastify.register(SetupEmbeddingGenerator);
+        fastify.register(SetupEmbeddingEncoder);
         fastify.register(async (fastify, opts) => {
             fastify.get("/status/ready", async function (request, reply) {
-                if (typeof this.embeddingGenerator === "object") {
+                if (typeof this.embeddingEncoder === "object") {
                     return { hasPlugin: true };
                 } else {
                     return { hasPlugin: false };
@@ -82,7 +82,7 @@ t.test(
             url: "/status/ready"
         });
         t.same(JSON.parse(res.payload), { hasPlugin: true });
-        (fastify.embeddingGenerator as any).setReady(false);
+        (fastify.embeddingEncoder as any).setReady(false);
         const res2 = await fastify.inject({
             url: "/status/ready"
         });

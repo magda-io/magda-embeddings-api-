@@ -1,10 +1,10 @@
 import fp from "fastify-plugin";
-import EmbeddingGenerator from "../libs/EmbeddingGenerator.js";
+import EmbeddingEncoder from "../libs/EmbeddingEncoder.js";
 
 // When using .decorate you have to specify added properties for Typescript
 declare module "fastify" {
     export interface FastifyInstance {
-        embeddingGenerator: EmbeddingGenerator;
+        embeddingEncoder: EmbeddingEncoder;
     }
 }
 
@@ -18,16 +18,16 @@ const WAIT_TIME_MS = 500;
 // to export the decorators to the outer scope
 export default fp<SupportPluginOptions>(
     async (fastify, opts) => {
-        const embeddingGenerator = new EmbeddingGenerator(
+        const embeddingEncoder = new EmbeddingEncoder(
             fastify?.appConfig?.modelList
         );
-        fastify.decorate("embeddingGenerator", embeddingGenerator);
+        fastify.decorate("embeddingEncoder", embeddingEncoder);
 
         fastify.addHook("onRequest", function (request, reply, next) {
             if (request.url.startsWith("/status/")) {
                 return next();
             }
-            if (!this.embeddingGenerator.isReady()) {
+            if (!this.embeddingEncoder.isReady()) {
                 reply.header("Retry-After", WAIT_TIME_MS);
                 reply.serviceUnavailable(
                     `Embedding service is not ready yet. Please try again in ${WAIT_TIME_MS}ms.`
@@ -37,14 +37,14 @@ export default fp<SupportPluginOptions>(
         });
 
         fastify.addHook("onClose", async function (instance) {
-            await instance.embeddingGenerator.dispose();
+            await instance.embeddingEncoder.dispose();
         });
 
-        await embeddingGenerator.waitTillReady();
+        await embeddingEncoder.waitTillReady();
     },
     {
         fastify: "4.x",
-        name: "setupEmbeddingGenerator",
+        name: "setupEmbeddingEncoder",
         dependencies: ["@fastify/sensible", "loadAppConfig"]
     }
 );

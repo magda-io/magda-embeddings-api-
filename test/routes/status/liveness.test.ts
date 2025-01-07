@@ -1,13 +1,13 @@
 import { test } from "node:test";
 import * as assert from "node:assert";
 import Fastify from "fastify";
-import { MockEmbeddingGenerator } from "../../helper.js";
+import { MockEmbeddingEncoder } from "../../helper.js";
 import liveness from "../../../src/routes/status/liveness.js";
 
 test("/status/liveness should always response 200", async (t) => {
     const fastify = Fastify();
-    const es = new MockEmbeddingGenerator();
-    fastify.decorate("embeddingGenerator", es);
+    const es = new MockEmbeddingEncoder();
+    fastify.decorate("embeddingEncoder", es);
 
     fastify.register(liveness);
 
@@ -36,9 +36,9 @@ test("/status/liveness should always response 200", async (t) => {
     );
     assert.equal(JSON.parse(res.payload).status, true);
 
-    (fastify.embeddingGenerator as any).setReady(false);
+    (fastify.embeddingEncoder as any).setReady(false);
 
-    // after embeddingGenerator.isReady = false
+    // after embeddingEncoder.isReady = false
     res = await fastify.inject({
         url: "/liveness"
     });

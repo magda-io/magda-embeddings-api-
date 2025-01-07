@@ -1,11 +1,11 @@
 import t from "tap";
-import EmbeddingGenerator from "../../src/libs/EmbeddingGenerator.js";
+import EmbeddingEncoder from "../../src/libs/EmbeddingEncoder.js";
 
 t.test("Test with default model", async (t) => {
-    let es: EmbeddingGenerator;
+    let es: EmbeddingEncoder;
 
     t.beforeEach(async () => {
-        es = new EmbeddingGenerator();
+        es = new EmbeddingEncoder();
         await es.waitTillReady();
     });
     t.afterEach(async () => {
@@ -18,14 +18,14 @@ t.test("Test with default model", async (t) => {
     });
 
     t.test("Should generate embedding without error", async (t) => {
-        const result = await es.generate("Hello world");
+        const result = await es.encode("Hello world");
         t.equal(result.tokenSize, 4);
     });
 });
 
 t.test("Test with custom model config", async (t) => {
     t.test("Should work with custom model config", async (t) => {
-        const es = new EmbeddingGenerator([
+        const es = new EmbeddingEncoder([
             {
                 name: "Xenova/bge-small-en-v1.5",
                 extraction_config: {
@@ -38,7 +38,7 @@ t.test("Test with custom model config", async (t) => {
         ]);
         await es.waitTillReady();
 
-        const result = await es.generate("Hello world");
+        const result = await es.encode("Hello world");
         t.equal(result.tokenSize, 4);
     });
 
@@ -51,7 +51,7 @@ t.test("Test with custom model config", async (t) => {
                 quantize: true,
                 precision: "ubinary"
             };
-            const es = new EmbeddingGenerator([
+            const es = new EmbeddingEncoder([
                 {
                     name: "Xenova/bge-small-en-v1.5",
                     extraction_config: { ...testConfig } as any
@@ -67,7 +67,7 @@ t.test("Test with custom model config", async (t) => {
             );
             await es.waitTillReady();
 
-            await es.generate("Hello world");
+            await es.encode("Hello world");
             t.match(results(), [
                 {
                     args: ["Hello world", { ...testConfig }],

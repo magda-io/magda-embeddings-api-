@@ -20,7 +20,7 @@ const readiness = fp(
         const fastify = fastifyInstance.withTypeProvider<TypeBoxTypeProvider>();
 
         fastify.get("/readiness", { schema }, async function (request, reply) {
-            if (this.embeddingGenerator?.isReady() === true) {
+            if (this.embeddingEncoder?.isReady() === true) {
                 return { status: true };
             } else {
                 reply.header("Retry-After", WAIT_TIME_MS);

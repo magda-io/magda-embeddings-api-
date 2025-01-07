@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import * as assert from "node:assert";
-import { defaultModel } from "../../../../src/libs/EmbeddingGenerator.js";
+import { defaultModel } from "../../../../src/libs/EmbeddingEncoder.js";
 import { build } from "../../../helper.js";
 
 const defaultModelName =

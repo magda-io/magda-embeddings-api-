@@ -20,7 +20,7 @@ export interface ExtractionConfig {
 
 export const defaultModel: ModelItem = {
     name: "Alibaba-NLP/gte-base-en-v1.5",
-    quantized: true,
+    quantized: false,
     extraction_config: {
         pooling: "cls",
         normalize: true,
@@ -51,7 +51,7 @@ export interface ModelItem {
 
 export type ConfigModelListItem = string | ModelItem;
 
-class EmbeddingGenerator {
+class EmbeddingEncoder {
     protected ready: boolean = false;
     protected readPromise: Promise<void>;
 
@@ -83,7 +83,7 @@ class EmbeddingGenerator {
      * - set this.defaultModel and this.supportModelNames
      *
      * @private
-     * @memberof EmbeddingGenerator
+     * @memberof embeddingEncoder
      */
     private processModelList(modelList: ConfigModelListItem[]) {
         const modelNames: string[] = [];
@@ -262,7 +262,7 @@ class EmbeddingGenerator {
         }
     }
 
-    async generate(
+    async encode(
         sentences: string | string[],
         model: string = this.defaultModel
     ) {
@@ -314,4 +314,4 @@ class EmbeddingGenerator {
     }
 }
 
-export default EmbeddingGenerator;
+export default EmbeddingEncoder;
