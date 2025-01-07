@@ -163,7 +163,7 @@ class EmbeddingEncoder {
 
         const defaultPretrainedOptions = {
             quantized: true,
-            config: null,
+            config: undefined,
             local_files_only: false,
             revision: "main"
         };
