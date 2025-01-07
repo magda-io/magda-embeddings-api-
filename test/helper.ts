@@ -31,7 +31,7 @@ export async function build(t: TestContext | Test) {
     // fastify-plugin ensures that all decorators
     // are exposed for testing purposes, this is
     // different from the production setup
-    const app = await helper.build(argv, await config());
+    const app = await helper.build(argv, {}, await config());
 
     // Tear down our app after we are done
     t.after(() => app.close());
