@@ -22,7 +22,7 @@
     "prebuild": "rimraf dist",
     "build": "tsc",
     "watch": "tsc -w",
-    "start": "npm run build && fastify start -l info dist/app.js",
+    "start": "npm run build && fastify start -l info dist/app.js -T 60",
     "dev": "npm run build && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"npm:watch\" \"npm:dev:start\"",
     "dev:start": "fastify start --ignore-watch=.ts$ -w -l info -P dist/app.js",
     "docker-build-local": "create-docker-context-for-node-component --build --push --tag auto --repository example.com",
@@ -47,7 +47,8 @@
     "fastify-cli": "^6.2.1",
     "fastify-plugin": "^4.5.1",
     "fs-extra": "^11.2.0",
-    "onnxruntime-node": "^1.20.1"
+    "onnxruntime-node": "^1.20.1",
+    "p-limit": "^6.2.0"
   },
   "devDependencies": {
     "@langchain/openai": "^0.2.8",

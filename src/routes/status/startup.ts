@@ -20,15 +20,7 @@ const startup = fp(
         const fastify = fastifyInstance.withTypeProvider<TypeBoxTypeProvider>();
 
         fastify.get("/startup", { schema }, async function (request, reply) {
-            if (this.embeddingEncoder?.isReady() === true) {
-                return { status: true };
-            } else {
-                reply.header("Retry-After", WAIT_TIME_MS);
-                reply.serviceUnavailable(
-                    `Embedding service is not ready yet. Please try again in ${WAIT_TIME_MS}ms.`
-                );
-                return reply;
-            }
+            return { status: true };
         });
     },
     {

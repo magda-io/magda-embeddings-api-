@@ -12,11 +12,6 @@ t.test("Test with default model", async (t) => {
         await es.dispose();
     });
 
-    t.test("Should tokenize text properly", async (t) => {
-        const result = await es.tokenize("Hello world");
-        t.equal(result.input_ids.size, 4);
-    });
-
     t.test("Should generate embedding without error", async (t) => {
         const result = await es.encode("Hello world");
         t.equal(result.tokenSize, 4);

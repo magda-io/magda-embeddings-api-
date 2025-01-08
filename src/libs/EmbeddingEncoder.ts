@@ -10,6 +10,7 @@ import {
     mean_pooling,
     PretrainedOptions
 } from "@huggingface/transformers";
+import { limitFunction } from "p-limit";
 
 export interface ExtractionConfig {
     pooling?: "none" | "mean" | "cls";
@@ -20,7 +21,7 @@ export interface ExtractionConfig {
 
 export const defaultModel: ModelItem = {
     name: "Alibaba-NLP/gte-base-en-v1.5",
-    quantized: false,
+    dtype: "q8",
     extraction_config: {
         pooling: "cls",
         normalize: true,
@@ -47,21 +48,35 @@ export interface ModelItem {
     revision?: string;
     model_file_name?: string;
     extraction_config?: ExtractionConfig;
+    dtype?: "fp32" | "fp16" | "q8" | "int8" | "uint8" | "q4" | "bnb4" | "q4f16";
 }
 
 export type ConfigModelListItem = string | ModelItem;
+
+const MODEL_RESET_RUN_COUNT_THRESHOLD = 1;
+
+interface ModelRefType {
+    modelPromise: Promise<PreTrainedModel>;
+    // how many pending runs
+    usage: number;
+    // total run count till now
+    runCount: number;
+}
 
 class EmbeddingEncoder {
     protected ready: boolean = false;
     protected readPromise: Promise<void>;
 
     private tokenizer: PreTrainedTokenizer | null = null;
-    private model: PreTrainedModel | null = null;
+    private modelRef: ModelRefType | null = null;
 
     private supportModelNames: string[] = [defaultModel.name];
     // although we allow user to pass in a list of models, we only use the first one (default model) is used for now
     private defaultModel: string = defaultModel.name;
     private modelList: ModelItem[] = [{ ...defaultModel }];
+    private runPromise: Promise<void> = Promise.resolve();
+
+    //private extractor: FeatureExtractionPipeline | null = null;
 
     private pipelineLayout = {
         tokenizer: AutoTokenizer,
@@ -153,13 +168,19 @@ class EmbeddingEncoder {
         await this.readPromise;
     }
 
-    private async createPipeline(
+    private createPretrainedOptions(
         model: string | null = null,
         pretrainedOptions: PretrainedOptions = {}
-    ) {
+    ): PretrainedOptions {
         if (!model) {
             model = this.defaultModel;
         }
+
+        const {
+            name: modelName,
+            extraction_config,
+            ...modelOpts
+        } = this.getModelByName(model);
 
         const defaultPretrainedOptions = {
             quantized: true,
@@ -170,25 +191,92 @@ class EmbeddingEncoder {
 
         pretrainedOptions = {
             ...defaultPretrainedOptions,
+            ...modelOpts,
             ...pretrainedOptions
         };
+        return pretrainedOptions;
+    }
+
+    private async createPipeline(
+        model: string | null = null,
+        pretrainedOptions: PretrainedOptions = {}
+    ) {
+        if (!model) {
+            model = this.defaultModel;
+        }
+        const runtimePretrainedOpt = this.createPretrainedOptions(
+            model,
+            pretrainedOptions
+        );
 
         // Load tokenizer and model one by one to reduce peak memory usage
         this.tokenizer = await this.pipelineLayout.tokenizer.from_pretrained(
             model,
-            pretrainedOptions
+            runtimePretrainedOpt
         );
-        this.model = await this.pipelineLayout.model.from_pretrained(
-            model,
-            pretrainedOptions
-        );
+        this.modelRef = {
+            modelPromise: this.pipelineLayout.model.from_pretrained(
+                model,
+                runtimePretrainedOpt
+            ),
+            usage: 0,
+            runCount: 0
+        };
+    }
+
+    /**
+     * Recreate model for every MODEL_RESET_RUN_COUNT_THRESHOLD runs to fix memory leaks issue
+     * todo: investigate root cause of the memory leaks possibly in upstream `transformers.js` or `onnxruntime-node`
+     *
+     * @private
+     * @param {*} model_inputs
+     * @return {*}
+     * @memberof EmbeddingEncoder
+     */
+    private async runModel(model_inputs: any) {
+        if (!this.modelRef) {
+            throw new Error("Tokenizer or model not initialized");
+        }
+        let runPromise: Promise<void>;
+        do {
+            runPromise = this.runPromise;
+        } while (runPromise !== this.runPromise);
+
+        let modelInstance: PreTrainedModel | null = null;
+        const currentModel = this.modelRef;
+        currentModel.usage++;
+        currentModel.runCount++;
+        try {
+            if (currentModel.runCount >= MODEL_RESET_RUN_COUNT_THRESHOLD) {
+                const runtimePretrainedOpt = this.createPretrainedOptions();
+                this.modelRef = {
+                    modelPromise: this.pipelineLayout.model.from_pretrained(
+                        this.defaultModel,
+                        runtimePretrainedOpt
+                    ),
+                    usage: 0,
+                    runCount: 0
+                };
+            }
+            modelInstance = await currentModel.modelPromise;
+            return await modelInstance(model_inputs);
+        } finally {
+            currentModel.usage--;
+            if (
+                !currentModel.usage &&
+                this.modelRef !== currentModel &&
+                modelInstance
+            ) {
+                modelInstance.dispose();
+            }
+        }
     }
 
     private async featureExtraction(
         texts: string | string[],
         opts: FeatureExtractionPipelineOptions = {}
     ) {
-        if (!this.tokenizer || !this.model) {
+        if (!this.tokenizer || !this.modelRef) {
             throw new Error("Tokenizer or model not initialized");
         }
 
@@ -208,7 +296,7 @@ class EmbeddingEncoder {
         });
 
         // Run model
-        const outputs = await this.model(model_inputs);
+        const outputs = await this.runModel(model_inputs);
 
         let result =
             outputs.last_hidden_state ??
@@ -237,12 +325,7 @@ class EmbeddingEncoder {
 
     protected async init() {
         // Create feature extraction pipeline
-        const {
-            name: modelName,
-            extraction_config,
-            ...modelOpts
-        } = this.getModelByName(this.defaultModel);
-        await this.createPipeline(modelName, modelOpts);
+        await this.createPipeline();
         this.ready = true;
     }
 
@@ -257,15 +340,36 @@ class EmbeddingEncoder {
     }
 
     async dispose() {
-        if (this.model) {
-            await this.model.dispose();
+        if (this.modelRef) {
+            await (await this.modelRef.modelPromise).dispose();
         }
     }
 
-    async encode(
+    public encode = limitFunction(this.__encode.bind(this), {
+        concurrency: 1
+    });
+
+    private async __encode(
         sentences: string | string[],
         model: string = this.defaultModel
     ) {
+        // const extractor = await pipeline(
+        //     "feature-extraction",
+        //     "Alibaba-NLP/gte-base-en-v1.5",
+        //     { dtype: "q8" }
+        // );
+        // if(!this.extractor){
+        //     throw new Error("Extractor is not initialised");
+        // }
+        // const output = await this.extractor(sentences[0], {
+        //     pooling: "cls",
+        //     normalize: true,
+        // });
+
+        // const embeddings = Array.from(output.data);
+        // const tokenSize = 0;
+        // return { embeddings, tokenSize, output };
+
         const { extraction_config } = this.getModelByName(model);
 
         const output = await this.featureExtraction(sentences, {
