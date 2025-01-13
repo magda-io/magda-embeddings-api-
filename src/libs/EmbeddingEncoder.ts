@@ -20,7 +20,7 @@ export interface ExtractionConfig {
 
 export const defaultModel: ModelItem = {
     name: "Alibaba-NLP/gte-base-en-v1.5",
-    quantized: false,
+    dtype: "fp32",
     extraction_config: {
         pooling: "cls",
         normalize: true,
@@ -47,6 +47,7 @@ export interface ModelItem {
     revision?: string;
     model_file_name?: string;
     extraction_config?: ExtractionConfig;
+    dtype?: "fp32" | "fp16" | "q8" | "int8" | "uint8" | "q4" | "bnb4" | "q4f16";
 }
 
 export type ConfigModelListItem = string | ModelItem;

@@ -77,7 +77,7 @@ Kubernetes: `>= 1.21.0`
 | livenessProbe.initialDelaySeconds | int | `10` |  |
 | livenessProbe.periodSeconds | int | `20` |  |
 | livenessProbe.successThreshold | int | `1` |  |
-| livenessProbe.timeoutSeconds | int | `5` |  |
+| livenessProbe.timeoutSeconds | int | `30` |  |
 | logLevel | string | `"warn"` | The log level of the application. one of 'fatal', 'error', 'warn', 'info', 'debug', 'trace';  also 'silent' is supported to disable logging.  Any other value defines a custom level and requires supplying a level value via levelVal. |
 | nameOverride | string | `""` |  |
 | nodeSelector | object | `{}` |  |
@@ -117,7 +117,7 @@ Kubernetes: `>= 1.21.0`
 | startupProbe.initialDelaySeconds | int | `10` |  |
 | startupProbe.periodSeconds | int | `10` |  |
 | startupProbe.successThreshold | int | `1` |  |
-| startupProbe.timeoutSeconds | int | `5` |  |
+| startupProbe.timeoutSeconds | int | `30` |  |
 | tolerations | list | `[]` |  |
 | topologySpreadConstraints | list | `[]` | This is the pod topology spread constraints https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/ |
 

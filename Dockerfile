@@ -9,11 +9,13 @@ RUN mkdir -p /usr/src/app /etc/config && \
 
 COPY . /usr/src/app
 # make local cache folder writable by 1000 user
-RUN chown -R 1000 /usr/src/app/component/node_modules/@huggingface/transformers/.cache
+RUN cd /usr/src/app/component/node_modules/@huggingface/transformers && rm -Rf .cache && mkdir .cache && chown -R 1000 .cache
 # Reinstall onnxruntime-node based on current building platform architecture
 RUN cd /usr/src/app/component/node_modules/onnxruntime-node && npm run postinstall
 # Reinstall sharp based on current building platform architecture
 RUN cd /usr/src/app/component/node_modules && rm -Rf @img && cd sharp && npm install
+# download default model
+RUN cd /usr/src/app/component && npm run download-default-model
 
 USER 1000
 WORKDIR /usr/src/app/component
