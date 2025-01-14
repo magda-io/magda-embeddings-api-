@@ -48,7 +48,8 @@
     "fastify-cli": "^6.2.1",
     "fastify-plugin": "^4.5.1",
     "fs-extra": "^11.2.0",
-    "onnxruntime-node": "^1.20.1"
+    "onnxruntime-node": "^1.20.1",
+    "p-limit": "^6.2.0"
   },
   "devDependencies": {
     "@langchain/openai": "^0.2.8",

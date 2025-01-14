@@ -10,6 +10,7 @@ import {
     mean_pooling,
     PretrainedOptions
 } from "@huggingface/transformers";
+import { limitFunction } from "p-limit";
 
 export interface ExtractionConfig {
     pooling?: "none" | "mean" | "cls";
@@ -263,7 +264,9 @@ class EmbeddingEncoder {
         }
     }
 
-    async encode(
+    encode = limitFunction(this.doEncode.bind(this), { concurrency: 1 });
+
+    async doEncode(
         sentences: string | string[],
         model: string = this.defaultModel
     ) {
