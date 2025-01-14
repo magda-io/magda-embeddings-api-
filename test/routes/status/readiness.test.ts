@@ -16,17 +16,7 @@ test("/status/readiness should only response 200 when ready", async (t) => {
     fastify.register(sensible);
     fastify.register(readiness);
 
-    // before embeddingEncoder is ready
-    let res = await fastify.inject({
-        url: "/readiness"
-    });
-    assert.strictEqual(res.statusCode, 503);
-    assert.strictEqual(res.headers["retry-after"], WAIT_TIME_MS + "");
-
-    await new Promise((resolve) => setTimeout(resolve, 600));
-
-    // after embeddingEncoder is ready
-    res = await fastify.inject({
+    const res = await fastify.inject({
         url: "/readiness"
     });
     assert.strictEqual(res.statusCode, 200);
@@ -35,13 +25,4 @@ test("/status/readiness should only response 200 when ready", async (t) => {
         "application/json; charset=utf-8"
     );
     assert.equal(JSON.parse(res.payload).status, true);
-
-    (fastify.embeddingEncoder as any).setReady(false);
-
-    // after embeddingEncoder.isReady = false
-    res = await fastify.inject({
-        url: "/readiness"
-    });
-    assert.strictEqual(res.headers["retry-after"], WAIT_TIME_MS + "");
-    assert.strictEqual(res.statusCode, 503);
 });

@@ -6,6 +6,7 @@ import * as path from "path";
 import { fileURLToPath } from "url";
 import type { Test } from "tap";
 import EmbeddingEncoder from "../src/libs/EmbeddingEncoder.js";
+import { defaultModel } from "../src/libs/EmbeddingEncoder.js";
 
 export type TestContext = {
     after: typeof test.after;
@@ -71,10 +72,16 @@ export async function requestEmbeddings(
         },
         body: JSON.stringify({
             input: sentences,
-            model: "Alibaba-NLP/gte-base-en-v1.5"
+            model:
+                typeof defaultModel === "string"
+                    ? defaultModel
+                    : defaultModel.name
         })
     });
     const resData: any = await res.json();
+    if (!res.ok) {
+        throw new Error(`Failed to get embeddings: ${JSON.stringify(resData)}`);
+    }
     const embeddings = resData.data.map((item: any) => item.embedding);
     return embeddings as number[][];
 }

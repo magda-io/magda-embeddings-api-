@@ -28,6 +28,7 @@ t.test("Test with custom model config", async (t) => {
         const es = new EmbeddingEncoder([
             {
                 name: "Xenova/bge-small-en-v1.5",
+                dtype: "q8",
                 extraction_config: {
                     pooling: "mean",
                     normalize: true,
@@ -54,6 +55,7 @@ t.test("Test with custom model config", async (t) => {
             const es = new EmbeddingEncoder([
                 {
                     name: "Xenova/bge-small-en-v1.5",
+                    dtype: "q8",
                     extraction_config: { ...testConfig } as any
                 }
             ]);
