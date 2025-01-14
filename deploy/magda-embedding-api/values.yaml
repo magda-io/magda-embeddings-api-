@@ -106,7 +106,7 @@ startupProbe:
     path: /status/startup
     port: 3000
   periodSeconds: 10
-  timeoutSeconds: 30
+  timeoutSeconds: 5
   failureThreshold: 30
   successThreshold: 1
   initialDelaySeconds: 10
@@ -116,7 +116,7 @@ livenessProbe:
     path: /status/liveness
     port: 3000
   periodSeconds: 20
-  timeoutSeconds: 30
+  timeoutSeconds: 5
   failureThreshold: 10
   successThreshold: 1
   initialDelaySeconds: 10
@@ -197,6 +197,4 @@ resources:
     # -- (string) the memory limit of the container
     # Due to [this issue of ONNX runtime](https://github.com/microsoft/onnxruntime/issues/15080), the peak memory usage of the service is much higher than the model file size. 
     # When change the default model, be sure to test the peak memory usage of the service before setting the memory limit.
-    # non-quantized model will be used by default, the memory limit is set to 2000M to accommodate the default non-quantized perk memory usage during the initial loading.
-    # If you use a quantized model, you can set the memory limit to a lower value (1100M peak memory would be sufficient).
     memory: "2000M"

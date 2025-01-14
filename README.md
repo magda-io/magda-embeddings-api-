@@ -77,7 +77,7 @@ Kubernetes: `>= 1.21.0`
 | livenessProbe.initialDelaySeconds | int | `10` |  |
 | livenessProbe.periodSeconds | int | `20` |  |
 | livenessProbe.successThreshold | int | `1` |  |
-| livenessProbe.timeoutSeconds | int | `30` |  |
+| livenessProbe.timeoutSeconds | int | `5` |  |
 | logLevel | string | `"warn"` | The log level of the application. one of 'fatal', 'error', 'warn', 'info', 'debug', 'trace';  also 'silent' is supported to disable logging.  Any other value defines a custom level and requires supplying a level value via levelVal. |
 | nameOverride | string | `""` |  |
 | nodeSelector | object | `{}` |  |
@@ -98,7 +98,7 @@ Kubernetes: `>= 1.21.0`
 | readinessProbe.successThreshold | int | `1` |  |
 | readinessProbe.timeoutSeconds | int | `5` |  |
 | replicas | int | `1` |  |
-| resources.limits.memory | string | `"2000M"` | the memory limit of the container Due to [this issue of ONNX runtime](https://github.com/microsoft/onnxruntime/issues/15080), the peak memory usage of the service is much higher than the model file size.  When change the default model, be sure to test the peak memory usage of the service before setting the memory limit. non-quantized model will be used by default, the memory limit is set to 2000M to accommodate the default non-quantized perk memory usage during the initial loading. If you use a quantized model, you can set the memory limit to a lower value (1100M peak memory would be sufficient). |
+| resources.limits.memory | string | `"2000M"` | the memory limit of the container Due to [this issue of ONNX runtime](https://github.com/microsoft/onnxruntime/issues/15080), the peak memory usage of the service is much higher than the model file size.  When change the default model, be sure to test the peak memory usage of the service before setting the memory limit. |
 | resources.requests.cpu | string | `"100m"` |  |
 | resources.requests.memory | string | `"850M"` | the memory request of the container Once the model is loaded, the memory usage of the service for serving request would be much lower. Set to 850M for default model. |
 | service.annotations | object | `{}` |  |
@@ -117,7 +117,7 @@ Kubernetes: `>= 1.21.0`
 | startupProbe.initialDelaySeconds | int | `10` |  |
 | startupProbe.periodSeconds | int | `10` |  |
 | startupProbe.successThreshold | int | `1` |  |
-| startupProbe.timeoutSeconds | int | `30` |  |
+| startupProbe.timeoutSeconds | int | `5` |  |
 | tolerations | list | `[]` |  |
 | topologySpreadConstraints | list | `[]` | This is the pod topology spread constraints https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/ |
 
