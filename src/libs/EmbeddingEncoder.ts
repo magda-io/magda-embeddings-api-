@@ -21,7 +21,7 @@ export interface ExtractionConfig {
 
 export const defaultModel: ModelItem = {
     name: "Alibaba-NLP/gte-base-en-v1.5",
-    dtype: "q8",
+    dtype: "fp32",
     extraction_config: {
         pooling: "cls",
         normalize: true,

@@ -106,7 +106,7 @@ startupProbe:
     path: /status/startup
     port: 3000
   periodSeconds: 10
-  timeoutSeconds: 5
+  timeoutSeconds: 30
   failureThreshold: 30
   successThreshold: 1
   initialDelaySeconds: 10
@@ -116,7 +116,7 @@ livenessProbe:
     path: /status/liveness
     port: 3000
   periodSeconds: 20
-  timeoutSeconds: 5
+  timeoutSeconds: 30
   failureThreshold: 10
   successThreshold: 1
   initialDelaySeconds: 10
