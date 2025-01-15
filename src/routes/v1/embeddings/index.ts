@@ -52,7 +52,10 @@ const embeddings: FastifyPluginAsync = async (
             ? request.body.input
             : [request.body.input];
         if (debugFlag) {
-            console.log("Received encode request. inputItems: ", inputItems);
+            console.log(
+                "Received encode request. inputItems: ",
+                JSON.stringify(inputItems)
+            );
         }
         const results = await this.embeddingEncoderWorker.exec("encode", [
             inputItems,

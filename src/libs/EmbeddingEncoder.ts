@@ -277,6 +277,23 @@ class EmbeddingEncoder {
         sentences: string | string[],
         model: string = this.defaultModel
     ) {
+        if (typeof sentences === "string") {
+            sentences = [sentences];
+        }
+        let tokenSize = 0;
+        const embeddings: number[][] = [];
+        for (let i = 0; i < sentences.length; i++) {
+            const output = await this.doEncode(sentences[i], model);
+            tokenSize += output.tokenSize;
+            embeddings.push(output.embeddings[0]);
+        }
+        return { embeddings, tokenSize };
+    }
+
+    async doEncode(
+        sentences: string | string[],
+        model: string = this.defaultModel
+    ) {
         const { extraction_config } = this.getModelByName(model);
 
         // if(typeof sentences === "string") {
