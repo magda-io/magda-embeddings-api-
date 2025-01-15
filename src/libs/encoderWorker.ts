@@ -7,6 +7,7 @@ export async function encode(
     sentences: string | string[],
     model: string = defaultModel.name
 ) {
+    await encoder.waitTillReady();
     return await encoder.encode(sentences, model);
 }
 
