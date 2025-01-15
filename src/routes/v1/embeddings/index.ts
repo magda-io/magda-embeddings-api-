@@ -50,11 +50,15 @@ const embeddings: FastifyPluginAsync = async (
         const inputItems = Array.isArray(request.body.input)
             ? request.body.input
             : [request.body.input];
+        console.log("Received encode request. inputItems: ", inputItems);
         const results = await this.embeddingEncoderWorker.exec("encode", [
             inputItems,
             model
         ]);
         const { embeddings, tokenSize } = results;
+        console.log(
+            `Encode request done. embeddings: ${embeddings[0].length} tokenSize: ${tokenSize}`
+        );
         const data = embeddings.map((embedding: number[][], index: number) => ({
             index,
             embedding,
