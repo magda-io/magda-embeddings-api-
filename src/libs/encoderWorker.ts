@@ -23,7 +23,7 @@ export function getDefaultModelName() {
 }
 
 export function isReady() {
-    return encoder.isReady;
+    return encoder.isReady();
 }
 
 workerpool.worker({

@@ -17,6 +17,7 @@ export interface SupportPluginOptions {
 // to export the decorators to the outer scope
 export default fp<SupportPluginOptions>(
     async (fastify, opts) => {
+        console.log("set up encoder worker pool...");
         const pool = workerpool.pool("./dist/libs/encoderWorker.js", {
             maxWorkers: 1,
             workerType: "process"
@@ -28,6 +29,7 @@ export default fp<SupportPluginOptions>(
         });
 
         await pool.exec("waitTillReady");
+        console.log("encoder worker pool is ready!");
     },
     {
         fastify: "4.x",
