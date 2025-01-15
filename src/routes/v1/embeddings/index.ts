@@ -33,7 +33,11 @@ const embeddings: FastifyPluginAsync = async (
     const fastify = fastifyInstance.withTypeProvider<TypeBoxTypeProvider>();
 
     fastify.post("/", { schema }, async function (request, reply) {
-        const supportModels = this.embeddingEncoder.supportModels;
+        const supportModels =
+            await this.embeddingEncoderWorker.exec("getSupportModels");
+        const defaultModelName = await this.embeddingEncoderWorker.exec(
+            "getDefaultModelName"
+        );
         if (
             request.body.model &&
             supportModels.indexOf(request.body.model) === -1
@@ -42,14 +46,16 @@ const embeddings: FastifyPluginAsync = async (
                 `Model \`${request.body.model}\` is not supported. Supported models: ${supportModels.join(", ")}`
             );
         }
-        const model =
-            request.body.model || fastify.embeddingEncoder.defaultModelName;
+        const model = request.body.model || defaultModelName;
         const inputItems = Array.isArray(request.body.input)
             ? request.body.input
             : [request.body.input];
-        const results = await this.embeddingEncoder.encode(inputItems, model);
+        const results = await this.embeddingEncoderWorker.exec("encode", [
+            inputItems,
+            model
+        ]);
         const { embeddings, tokenSize } = results;
-        const data = embeddings.map((embedding, index) => ({
+        const data = embeddings.map((embedding: number[][], index: number) => ({
             index,
             embedding,
             object: "embedding"

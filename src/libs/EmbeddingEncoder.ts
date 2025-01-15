@@ -10,7 +10,6 @@ import {
     mean_pooling,
     PretrainedOptions
 } from "@huggingface/transformers";
-import { limitFunction } from "p-limit";
 
 export interface ExtractionConfig {
     pooling?: "none" | "mean" | "cls";
@@ -19,11 +18,21 @@ export interface ExtractionConfig {
     precision?: "binary" | "ubinary";
 }
 
+// export const defaultModel: ModelItem = {
+//     name: "Alibaba-NLP/gte-base-en-v1.5",
+//     dtype: "fp32",
+//     extraction_config: {
+//         pooling: "cls",
+//         normalize: true,
+//         quantize: false
+//     }
+// };
+
 export const defaultModel: ModelItem = {
-    name: "Alibaba-NLP/gte-base-en-v1.5",
-    dtype: "q8",
+    name: "Xenova/bge-base-en-v1.5",
+    dtype: "fp16",
     extraction_config: {
-        pooling: "cls",
+        pooling: "mean",
         normalize: true,
         quantize: false
     }
@@ -186,7 +195,7 @@ class EmbeddingEncoder {
         );
     }
 
-    private async featureExtraction(
+    async featureExtraction(
         texts: string | string[],
         opts: FeatureExtractionPipelineOptions = {}
     ) {
@@ -264,13 +273,31 @@ class EmbeddingEncoder {
         }
     }
 
-    encode = limitFunction(this.doEncode.bind(this), { concurrency: 1 });
-
-    async doEncode(
+    async encode(
         sentences: string | string[],
         model: string = this.defaultModel
     ) {
         const { extraction_config } = this.getModelByName(model);
+
+        // if(typeof sentences === "string") {
+        //     sentences = [sentences];
+        // }
+
+        // let tokenSize = 0;
+        // const embeddings: number[][] = [];
+
+        // for(let i = 0; i < sentences.length; i++) {
+        //     const output = await this.featureExtraction(sentences[i], {
+        //         ...extraction_config
+        //     });
+
+        //     const result = output[0].tolist();
+        //     const textEmbeddings = (result as number[][])[0];
+        //     const textTokenSize = output[1].input_ids.size as number;
+
+        //     embeddings.push(textEmbeddings);
+        //     tokenSize += textTokenSize;
+        // }
 
         const output = await this.featureExtraction(sentences, {
             ...extraction_config

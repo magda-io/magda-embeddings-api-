@@ -7,7 +7,6 @@ import { fileURLToPath } from "url";
 import type { Test } from "tap";
 import EmbeddingEncoder from "../src/libs/EmbeddingEncoder.js";
 import { defaultModel } from "../src/libs/EmbeddingEncoder.js";
-
 export type TestContext = {
     after: typeof test.after;
 };
@@ -55,6 +54,32 @@ export class MockEmbeddingEncoder extends EmbeddingEncoder {
         );
         this.ready = true;
         return {} as any;
+    }
+    setReady(v: boolean) {
+        this.ready = v;
+    }
+}
+
+export class MockEmbeddingEncoderWorker {
+    private mockModelLoadingTime: number;
+    private ready: boolean = false;
+
+    constructor(mockModelLoadingTime: number = MOCK_MODEL_LOADING_TIME) {
+        this.mockModelLoadingTime = mockModelLoadingTime;
+        this.init();
+    }
+    async init() {
+        await new Promise((resolve) =>
+            setTimeout(resolve, this.mockModelLoadingTime)
+        );
+        this.ready = true;
+        return {} as any;
+    }
+    isReady() {
+        return this.ready;
+    }
+    exec(funcName: string, argv?: any) {
+        return (this as any)?.[funcName]?.call(this, argv);
     }
     setReady(v: boolean) {
         this.ready = v;

@@ -2,17 +2,17 @@ import { test } from "node:test";
 import * as assert from "node:assert";
 import Fastify from "fastify";
 import sensible from "@fastify/sensible";
-import { MockEmbeddingEncoder } from "../../helper.js";
-import readiness, { WAIT_TIME_MS } from "../../../src/routes/status/startup.js";
+import { MockEmbeddingEncoderWorker } from "../../helper.js";
+import startup, { WAIT_TIME_MS } from "../../../src/routes/status/startup.js";
 
 test("/status/startup should only response 200 when ready", async (t) => {
     const fastify = Fastify();
     t.after(() => fastify.close());
 
-    const es = new MockEmbeddingEncoder(500);
-    fastify.decorate("embeddingEncoder", es);
+    const es = new MockEmbeddingEncoderWorker(500);
+    fastify.decorate("embeddingEncoderWorker", es as any);
     fastify.register(sensible);
-    fastify.register(readiness);
+    fastify.register(startup);
 
     // before embeddingEncoder is ready
     let res = await fastify.inject({
@@ -34,7 +34,7 @@ test("/status/startup should only response 200 when ready", async (t) => {
     );
     assert.equal(JSON.parse(res.payload).status, true);
 
-    (fastify.embeddingEncoder as any).setReady(false);
+    (fastify.embeddingEncoderWorker as any).setReady(false);
 
     // after embeddingEncoder.isReady = false
     res = await fastify.inject({
