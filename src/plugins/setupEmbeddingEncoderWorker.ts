@@ -20,6 +20,7 @@ export default fp<SupportPluginOptions>(
         console.log("set up encoder worker pool...");
         const pool = workerpool.pool("./dist/libs/encoderWorker.js", {
             maxWorkers: 1,
+            minWorkers: 1,
             workerType: "process"
         });
         fastify.decorate("embeddingEncoderWorker", pool);
